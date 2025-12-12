@@ -20,5 +20,19 @@ pub struct SourceDefinition {
 
 /// Validates the parameters (e.g., source within bounds).
 pub fn validate_parameters(params: &SimulationParameters) -> Result<(), String> {
-    todo!("Implement parameter validation")
+    if params.width == 0 || params.height == 0 {
+        return Err("Width and height must be greater than 0".to_string());
+    }
+    // Source position must be 0-indexed and strictly less than width/height
+    if params.source.x >= params.width || params.source.y >= params.height {
+        return Err(format!("Source position ({}, {}) must be within simulation bounds (0..{}x0..{})",
+                           params.source.x, params.source.y, params.width - 1, params.height - 1));
+    }
+    if params.source.frequency <= 0.0 {
+        return Err("Source frequency must be greater than 0".to_string());
+    }
+    if params.duration_steps == 0 {
+        return Err("Duration steps must be greater than 0".to_string());
+    }
+    Ok(())
 }

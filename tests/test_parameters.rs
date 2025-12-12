@@ -37,6 +37,18 @@ fn test_validate_parameters_source_out_of_bounds() {
 }
 
 #[test]
+fn test_validate_parameters_source_on_boundary() {
+    let params = SimulationParameters {
+        width: 100,
+        height: 100,
+        source: SourceDefinition { x: 100, y: 50, amplitude: 1.0, frequency: 1.0 }, // x = width is invalid (0..99)
+        obstacles: vec![],
+        duration_steps: 100,
+    };
+    assert!(validate_parameters(&params).is_err());
+}
+
+#[test]
 fn test_validate_parameters_negative_frequency() {
     let params = SimulationParameters {
         width: 100,

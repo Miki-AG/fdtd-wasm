@@ -19,6 +19,14 @@ fn test_state_new_initialization() {
 }
 
 #[test]
+fn test_state_new_zero_size() {
+    // Should be valid to create, just empty vectors
+    let state = SimulationState::new(0, 0);
+    assert_eq!(state.width, 0);
+    assert!(state.ez.is_empty());
+}
+
+#[test]
 fn test_state_reset() {
     let width = 10;
     let height = 10;
