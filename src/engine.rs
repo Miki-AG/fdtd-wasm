@@ -1,9 +1,14 @@
 use crate::state::SimulationState;
 use crate::parameters::SourceDefinition;
 
-/// Updates the magnetic fields (Hx, Hy) for one time step.
-pub fn update_h_fields(state: &mut SimulationState) {
-    todo!("Implement H-field update equations")
+/// Updates the magnetic field Hx for one time step.
+pub fn update_hx(state: &mut SimulationState) {
+    todo!("Implement Hx update equations")
+}
+
+/// Updates the magnetic field Hy for one time step.
+pub fn update_hy(state: &mut SimulationState) {
+    todo!("Implement Hy update equations")
 }
 
 /// Updates the electric field (Ez) for one time step.
@@ -17,9 +22,24 @@ pub fn apply_source(state: &mut SimulationState, source: &SourceDefinition) {
     todo!("Inject source signal into Ez field")
 }
 
-/// Applies boundary conditions (e.g., Absorbing Boundary Conditions).
-pub fn apply_boundaries(state: &mut SimulationState) {
-    todo!("Implement ABCs")
+/// Applies Absorbing Boundary Conditions (ABC) to the Left boundary.
+pub fn apply_boundary_left(state: &mut SimulationState) {
+    todo!("Implement ABC for Left boundary")
+}
+
+/// Applies Absorbing Boundary Conditions (ABC) to the Right boundary.
+pub fn apply_boundary_right(state: &mut SimulationState) {
+    todo!("Implement ABC for Right boundary")
+}
+
+/// Applies Absorbing Boundary Conditions (ABC) to the Top boundary.
+pub fn apply_boundary_top(state: &mut SimulationState) {
+    todo!("Implement ABC for Top boundary")
+}
+
+/// Applies Absorbing Boundary Conditions (ABC) to the Bottom boundary.
+pub fn apply_boundary_bottom(state: &mut SimulationState) {
+    todo!("Implement ABC for Bottom boundary")
 }
 
 /// Helper to compute the signal value at a given time `t`.

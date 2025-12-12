@@ -3,6 +3,7 @@ pub mod state;
 pub mod engine;
 pub mod rasterizer;
 pub mod utils;
+pub mod step;
 
 use wasm_bindgen::prelude::*;
 use parameters::SimulationParameters;
@@ -24,7 +25,7 @@ impl FdtdSimulator {
 
     /// Advances the simulation by one step.
     pub fn step(&mut self) {
-        todo!("Call engine update functions")
+        step::step(&self.params, &mut self.state);
     }
 
     /// Returns a pointer to the image buffer (RGBA) for the current state.
