@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rust Test Report</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        h1 { margin-bottom: 10px; }
+        .summary { margin-bottom: 20px; font-weight: bold; }
+        .pass { color: green; }
+        .fail { color: red; }
+        table { border-collapse: collapse; width: 100%; max-width: 800px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .status-ok { background-color: #dff0d8; color: #3c763d; }
+        .status-FAILED { background-color: #f2dede; color: #a94442; }
+    </style>
+</head>
+<body>
+    <h1>Rust Test Report</h1>
+    <div class="summary">
+        Date: 12/11/2025, 8:38:50 PM<br>
+        Total: 6 | <span class="pass">Passed: 5</span> | <span class="fail">Failed: 1</span>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Test Name</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td>test_compute_signal</td>
+                <td class="status-ok">ok</td>
+            </tr>
+            <tr>
+                <td>test_parameter_validation</td>
+                <td class="status-ok">ok</td>
+            </tr>
+            <tr>
+                <td>test_rasterizer_simple_rect</td>
+                <td class="status-ok">ok</td>
+            </tr>
+            <tr>
+                <td>test_state_initialization</td>
+                <td class="status-ok">ok</td>
+            </tr>
+            <tr>
+                <td>test_engine_update_step</td>
+                <td class="status-ok">ok</td>
+            </tr>
+            <tr>
+                <td>test_simulator_interface</td>
+                <td class="status-FAILED">FAILED</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h2>Raw Output</h2>
+    <pre>
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 6 tests
+test test_compute_signal ... ok
+test test_parameter_validation ... ok
+test test_rasterizer_simple_rect ... ok
+test test_state_initialization ... ok
+test test_engine_update_step ... ok
+test test_simulator_interface ... FAILED
+
+failures:
+
+---- test_simulator_interface stdout ----
+thread &#039;test_simulator_interface&#039; panicked at /Users/miguelarmengol/.cargo/registry/src/index.crates.io-6f17d22bba15001f/js-sys-0.3.83/src/lib.rs:3646:1:
+cannot call wasm-bindgen imported functions on non-wasm targets
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    test_simulator_interface
+
+test result: FAILED. 5 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+warning: unused import: `crate::parameters::SimulationParameters`
+ --&gt; src/state.rs:1:5
+  |
+1 | use crate::parameters::SimulationParameters;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused variable: `state`
+  --&gt; src/engine.rs:65:21
+   |
+65 | pub fn apply_source(state: &amp;mut SimulationState, source: &amp;SourceDefinition) {
+   |                     ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+   |
+   = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `source`
+  --&gt; src/engine.rs:65:50
+   |
+65 | pub fn apply_source(state: &amp;mut SimulationState, source: &amp;SourceDefinition) {
+   |                                                  ^^^^^^ help: if this is intentional, prefix it with an underscore: `_source`
+
+warning: unused variable: `state`
+  --&gt; src/engine.rs:70:25
+   |
+70 | pub fn apply_boundaries(state: &amp;mut SimulationState) {
+   |                         ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: fields `params` and `state` are never read
+  --&gt; src/lib.rs:13:5
+   |
+12 | pub struct FdtdSimulator {
+   |            ------------- fields in this struct
+13 |     params: SimulationParameters,
+   |     ^^^^^^
+14 |     state: SimulationState,
+   |     ^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: `fdtd_wasm` (lib) generated 5 warnings (run `cargo fix --lib -p fdtd_wasm` to apply 4 suggestions)
+warning: `fdtd_wasm` (lib test) generated 5 warnings (5 duplicates)
+   Compiling fdtd_wasm v0.1.0 (/Users/miguelarmengol/_dev/ocecat/fdtd-wasm)
+warning: unused import: `wasm_bindgen::JsValue`
+ --&gt; tests/integration_tests.rs:6:5
+  |
+6 | use wasm_bindgen::JsValue;
+  |     ^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: `fdtd_wasm` (test &quot;integration_tests&quot;) generated 1 warning (run `cargo fix --test &quot;integration_tests&quot;` to apply 1 suggestion)
+    Finished test [unoptimized + debuginfo] target(s) in 0.70s
+     Running unittests src/lib.rs (target/debug/deps/fdtd_wasm-9056a293140c4c63)
+     Running tests/integration_tests.rs (target/debug/deps/integration_tests-f177705146bde997)
+error: test failed, to rerun pass `--test integration_tests`
+</pre>
+</body>
+</html>
+        
