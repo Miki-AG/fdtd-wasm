@@ -21,7 +21,20 @@ impl FdtdSimulator {
     /// Creates a new simulator instance with the given JSON configuration.
     #[wasm_bindgen(constructor)]
     pub fn new(config_json: JsValue) -> Result<FdtdSimulator, JsValue> {
-        todo!("Parse config, initialize state, rasterize obstacles")
+        utils::set_panic_hook();
+
+        let params: SimulationParameters = serde_wasm_bindgen::from_value(config_json)
+            .map_err(|e| JsValue::from_str(&format!("Failed to parse config: {}", e)))?;
+
+        parameters::validate_parameters(&params)
+            .map_err(|e| JsValue::from_str(&format!("Invalid parameters: {}", e)))?;
+
+        let mut state = SimulationState::new(params.width, params.height);
+
+        // Rasterize obstacles
+        state.materials = rasterizer::rasterize_obstacles(params.width, params.height, &params.obstacles);
+
+        Ok(FdtdSimulator { params, state })
     }
 
     /// Advances the simulation by one step.
@@ -38,6 +51,6 @@ impl FdtdSimulator {
     
     /// Returns the current simulation time step.
     pub fn get_current_step(&self) -> usize {
-        todo!("Return current step")
+        self.state.time_step
     }
 }

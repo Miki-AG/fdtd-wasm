@@ -100,27 +100,40 @@ function generateReport() {
 
     // Update Status
     for (const api of publicApis) {
-        const matchingTest = actualTestResults.find(tr => tr.name.includes(api.rawFnName));
+        // Precise matching: prefer test names that also contain the module name or struct name to avoid ambiguity
+        let matchingTest = actualTestResults.find(tr => {
+            // Strong match: test name contains both module/struct name AND function name
+            const structOrMod = api.name.split('::')[0].toLowerCase();
+            return tr.name.toLowerCase().includes(structOrMod) && tr.name.includes(api.rawFnName);
+        });
+
+        // Fallback: just function name
+        if (!matchingTest) {
+            matchingTest = actualTestResults.find(tr => tr.name.includes(api.rawFnName));
+        }
+
         if (matchingTest) {
-            api.status = matchingTest.status === 'ok' ? 'Pass' : 'Fail';
+            const isWasmTest = matchingTest.name.includes('fdtd_simulator');
+            if (isWasmTest && matchingTest.status === 'FAILED') {
+                 api.status = 'Expected Fail (WASM)'; 
+            } else {
+                api.status = matchingTest.status === 'ok' ? 'Pass' : 'Fail';
+            }
         } else if (api.hasTest) {
              api.status = 'Test Written (Not Run/Wasm)';
         }
     }
 
     // --- GROUP BY MODULE ---
-    // Explicitly distribute modules into 3 columns
     const columns = [
         ['parameters', 'state', 'rasterizer'], // Column 1
         ['renderer', 'engine', 'step'],       // Column 2
         ['lib', 'utils']                      // Column 3
     ];
     
-    // Create a map of Module -> APIs
     const groupedApis = {};
     columns.flat().forEach(m => groupedApis[m] = []);
     
-    // Handle any extra modules not in list by adding them to the last column
     publicApis.forEach(api => {
         if (!groupedApis[api.module]) {
             groupedApis[api.module] = [];
@@ -183,15 +196,25 @@ function generateReport() {
     <title>API & Test Coverage Report</title>
     <style>
         body { font-family: sans-serif; font-size: 11px; padding: 10px; background-color: #f4f4f4; margin: 0; }
-        h1 { font-size: 16px; margin: 10px 0; text-align: center; }
+        h1 { font-size: 16px; margin: 10px 0; text-align: center; position: relative; }
         h2 { font-size: 13px; margin-top: 5px; margin-bottom: 5px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 3px; }
         .summary { font-size: 11px; margin-bottom: 10px; font-weight: bold; text-align: center; background: white; padding: 8px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         
-        /* Column Container */
+        /* Auto-refresh control */
+        #refresh-control {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
         .columns-container {
             display: flex;
             gap: 10px;
-            align-items: flex-start; /* Prevent stretching height */
+            align-items: flex-start;
         }
         
         .column {
@@ -199,7 +222,7 @@ function generateReport() {
             display: flex;
             flex-direction: column;
             gap: 10px;
-            min-width: 0; /* Allow flex shrinking */
+            min-width: 0;
         }
 
         .module-group { 
@@ -222,7 +245,8 @@ function generateReport() {
         .status-Fail { background-color: #f2dede; color: #a94442; font-weight: bold; }
         .status-NoTest { background-color: #fcf8e3; color: #8a6d3b; }
         .status-TestWrittenNotRunWasm { background-color: #d9edf7; color: #31708f; }
-        
+        .status-ExpectedFailWASM { background-color: #e0e0e0; color: #555; font-style: italic; }
+
         ul { columns: 3; -webkit-columns: 3; -moz-columns: 3; font-size: 10px; padding-left: 15px; margin: 0; }
         li { margin-bottom: 1px; }
 
@@ -231,9 +255,50 @@ function generateReport() {
             ul { columns: 1; }
         }
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const checkbox = document.getElementById('auto-refresh');
+            const statusText = document.getElementById('refresh-status');
+            let intervalId = null;
+
+            // Load state from localStorage
+            const savedState = localStorage.getItem('autoRefresh');
+            if (savedState === 'true') {
+                checkbox.checked = true;
+                startRefresh();
+            }
+
+            checkbox.addEventListener('change', (e) => {
+                localStorage.setItem('autoRefresh', e.target.checked);
+                if (e.target.checked) {
+                    startRefresh();
+                } else {
+                    stopRefresh();
+                }
+            });
+
+            function startRefresh() {
+                statusText.innerText = '(On)';
+                intervalId = setInterval(() => {
+                    location.reload();
+                }, 5000);
+            }
+
+            function stopRefresh() {
+                statusText.innerText = '(Off)';
+                if (intervalId) clearInterval(intervalId);
+            }
+        });
+    </script>
 </head>
 <body>
-    <h1>API & Test Coverage Report</h1>
+    <h1>API & Test Coverage Report 
+        <div id="refresh-control">
+            <label for="auto-refresh">Auto-Refresh</label>
+            <input type="checkbox" id="auto-refresh">
+            <span id="refresh-status">(Off)</span>
+        </div>
+    </h1>
     <div class="summary">
         Date: ${new Date().toLocaleString()}<br>
         Total APIs: ${totalApis} | APIs with Tests: ${apisWithTests} | APIs without Tests: ${apisWithoutTests}

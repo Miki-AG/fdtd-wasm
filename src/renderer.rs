@@ -2,16 +2,28 @@ use crate::state::SimulationState;
 
 /// Renders the current simulation state to an RGBA buffer.
 pub fn render(state: &SimulationState) -> Vec<u8> {
-    todo!("Iterate over state.ez and call map_value_to_color, flattening into RGBA vector")
+    let mut buffer = Vec::with_capacity(state.width * state.height * 4);
+    for &val in &state.ez {
+        let color = map_value_to_color(val);
+        buffer.extend_from_slice(&color);
+    }
+    buffer
 }
 
-/// Maps a single field value to an RGBA color.
-/// 
-/// # Arguments
-/// * `value` - The field value (e.g., Ez). Positive values -> Red, Negative -> Blue.
-/// 
-/// # Returns
-/// * `[u8; 4]` - RGBA color array, e.g., [255, 0, 0, 255].
 pub fn map_value_to_color(value: f64) -> [u8; 4] {
-    todo!("Implement color mapping logic (Gradient/LUT)")
+    // Basic mapping:
+    // val > 0 -> Red intensity
+    // val < 0 -> Blue intensity
+    // val = 0 -> Black
+    // Clamp at +/- 1.0 for max intensity
+    
+    let intensity = (value.abs().min(1.0) * 255.0) as u8;
+    
+    if value > 0.0 {
+        [intensity, 0, 0, 255]
+    } else if value < 0.0 {
+        [0, 0, intensity, 255]
+    } else {
+        [0, 0, 0, 255]
+    }
 }
