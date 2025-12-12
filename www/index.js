@@ -147,6 +147,52 @@ function updateCommsUI() {
     }
 }
 
+function computeDFT(signal) {
+    const N = signal.length;
+    const spectrum = new Array(N / 2).fill(0);
+    
+    for (let k = 0; k < N / 2; k++) {
+        let re = 0;
+        let im = 0;
+        for (let n = 0; n < N; n++) {
+            const theta = -2 * Math.PI * k * n / N;
+            re += signal[n] * Math.cos(theta);
+            im += signal[n] * Math.sin(theta);
+        }
+        // Magnitude
+        spectrum[k] = Math.sqrt(re * re + im * im);
+    }
+    return spectrum;
+}
+
+function drawFFT() {
+    if (!fftCtx) return;
+    fftCtx.fillStyle = '#000';
+    fftCtx.fillRect(0, 0, 100, 100);
+    
+    const spectrum = computeDFT(signalHistory);
+    // Find max for scaling
+    let maxMag = 0;
+    for (let i = 0; i < spectrum.length; i++) {
+        if (spectrum[i] > maxMag) maxMag = spectrum[i];
+    }
+    
+    fftCtx.fillStyle = '#0ff'; // Cyan bars
+    
+    const barWidth = 100 / spectrum.length;
+    
+    for (let i = 0; i < spectrum.length; i++) {
+        let height = 0;
+        if (maxMag > 0.001) {
+            height = (spectrum[i] / maxMag) * 90; // leave 10px headroom
+        }
+        
+        const x = i * barWidth;
+        const y = 100 - height;
+        fftCtx.fillRect(x, y, barWidth - 1, height);
+    }
+}
+
 function drawSignal() {
     signalCtx.fillStyle = '#000';
     signalCtx.fillRect(0, 0, 100, 100);
@@ -257,6 +303,7 @@ function renderLoop() {
 
     draw();
     drawSignal();
+    drawFFT();
     updateStats();
     updateCommsUI();
 

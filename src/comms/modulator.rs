@@ -10,13 +10,20 @@ pub fn text_to_bits(text: &str) -> Vec<u8> {
     bits
 }
 
+#[derive(Clone, Copy, PartialEq)]
+pub enum ModulationScheme {
+    FSK,
+    ASK,
+}
+
 pub struct Modulator {
     bits: Vec<u8>,
     current_bit_idx: usize,
     samples_per_symbol: usize,
     sample_counter: usize,
     freq_0: f64,
-    freq_1: f64,
+    freq_1: f64, // Used as carrier for ASK
+    scheme: ModulationScheme,
 }
 
 impl Modulator {
@@ -28,7 +35,12 @@ impl Modulator {
             sample_counter: 0,
             freq_0,
             freq_1,
+            scheme: ModulationScheme::FSK, // Default
         }
+    }
+
+    pub fn set_scheme(&mut self, scheme: ModulationScheme) {
+        self.scheme = scheme;
     }
 
     pub fn load_text(&mut self, text: &str) {
@@ -46,10 +58,6 @@ impl Modulator {
         let sum: u16 = payload_bytes.iter().map(|&b| b as u16).sum();
         data.push((sum % 256) as u8);
         
-        // Convert to bits (MSB first logic needed for packet decoder?)
-        // Decoder shifts << 1 | bit. So MSB first.
-        // My previous text_to_bits was MSB first (7..0). Good.
-        
         self.bits.clear();
         for byte in data {
             for i in (0..8).rev() {
@@ -61,15 +69,27 @@ impl Modulator {
         self.sample_counter = 0;
     }
 
-    /// Returns the frequency for the current time step.
+    /// Returns (frequency, amplitude) for the current time step.
     /// Returns None if transmission is idle.
-    pub fn next_frequency(&mut self) -> Option<f64> {
+    pub fn next_modulation(&mut self) -> Option<(f64, f64)> {
         if self.current_bit_idx >= self.bits.len() {
             return None;
         }
 
         let bit = self.bits[self.current_bit_idx];
-        let freq = if bit == 1 { self.freq_1 } else { self.freq_0 };
+        let (freq, amp) = match self.scheme {
+            ModulationScheme::FSK => {
+                let f = if bit == 1 { self.freq_1 } else { self.freq_0 };
+                (f, 1.0)
+            },
+            ModulationScheme::ASK => {
+                // ASK: Carrier is freq_1 (or freq_0? usually higher or standard). 
+                // Let's use freq_1 as "Carrier".
+                // Bit 1 -> Amp 1.0. Bit 0 -> Amp 0.0.
+                let a = if bit == 1 { 1.0 } else { 0.0 };
+                (self.freq_1, a)
+            }
+        };
 
         self.sample_counter += 1;
         if self.sample_counter >= self.samples_per_symbol {
@@ -77,10 +97,6 @@ impl Modulator {
             self.current_bit_idx += 1;
         }
 
-        Some(freq)
-    }
-
-    pub fn get_bits_string(&self) -> String {
-        self.bits.iter().map(|b| b.to_string()).collect()
+        Some((freq, amp))
     }
 }

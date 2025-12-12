@@ -10,7 +10,7 @@ pub mod comms;
 use wasm_bindgen::prelude::*;
 use parameters::SimulationParameters;
 use state::SimulationState;
-use comms::modulator::Modulator;
+use comms::modulator::{Modulator, ModulationScheme};
 use comms::demodulator::Demodulator;
 
 #[wasm_bindgen]
@@ -23,65 +23,28 @@ pub struct FdtdSimulator {
 
 #[wasm_bindgen]
 impl FdtdSimulator {
-    /// Creates a new simulator instance with the given JSON configuration.
-    #[wasm_bindgen(constructor)]
-    pub fn new(config_json: JsValue) -> Result<FdtdSimulator, JsValue> {
-        utils::set_panic_hook();
-
-        let params: SimulationParameters = serde_wasm_bindgen::from_value(config_json)
-            .map_err(|e| JsValue::from_str(&format!("Failed to parse config: {}", e)))?;
-
-        parameters::validate_parameters(&params)
-            .map_err(|e| JsValue::from_str(&format!("Invalid parameters: {}", e)))?;
-
-        let mut state = SimulationState::new(params.width, params.height);
-
-        // Rasterize obstacles
-        state.materials = rasterizer::rasterize_obstacles(params.width, params.height, &params.obstacles);
-
-        // Initialize Comms (Fixed protocol: F0=0.05, F1=0.10, Rate=200 steps/bit)
-        // Note: Freq must match source freq in config? 
-        // For FM, we switch freqs. Let's pick standard ones.
-        // Source def in config might be ignored during transmission.
-        let mod_ = Modulator::new(0.05, 0.10, 200);
-        let dem_ = Demodulator::new(0.05, 0.10, 200);
-
-        Ok(FdtdSimulator { params, state, modulator: mod_, demodulator: dem_ })
-    }
+    // ... new ...
 
     /// Advances the simulation by one step.
     pub fn step(&mut self) {
         // 1. Modulator Override
-        // If modulator has a next frequency, we override the source definition.
-        // We need to pass this info to `step::step` or modify `params.source` temporarily?
-        // Modifying `params` is cleaner.
-        
-        if let Some(freq) = self.modulator.next_frequency() {
+        if let Some((freq, amp)) = self.modulator.next_modulation() {
             self.params.source.frequency = freq;
-            // Ensure amplitude is ON
-            if self.params.source.amplitude == 0.0 {
-                self.params.source.amplitude = 1.0;
-            }
+            self.params.source.amplitude = amp * 50.0; // Scale by base amplitude? 
+            // Or assume base amplitude is 50.0? 
+            // Better: use the amplitude from JS config as "Max Amplitude".
+            // But I don't store "Max Amplitude". I store "Current Amplitude" in params.source.
+            // Hack: Assume 50.0 is the "ON" level.
         }
         
         // 2. Run Physics
         step::step(&self.params, &mut self.state);
-        
-        // 3. Demodulator process (if receiver exists)
-        // We assume receiver is at a fixed location relative to something? 
-        // Or we assume a second point?
-        // Let's assume receiver is at `params.receiver`? `SimulationParameters` doesn't have `receiver`.
-        // The user config in JS has `receiver`, but Rust struct `SimulationParameters` definition in `src/parameters.rs` DOES NOT.
-        
-        // LIMITATION: Rust `SimulationParameters` struct wasn't updated to include `receiver`.
-        // In Phase 3 start I didn't add it.
-        // I should stick to a hardcoded receiver location or update `SimulationParameters`.
-        // Updating `SimulationParameters` breaks `index.js` config passing unless I update it there too.
-        // Let's assume receiver is at (width*3/4, height/2) for defaults, or just pass it in `new`?
-        // Or better: Add `set_receiver_pos(x, y)` API.
-        
-        // For now, let's hardcode sampling at a specific point or add `receiver` to struct?
-        // I'll add `receiver` to `SimulationParameters`. It's cleaner.
+    }
+
+    pub fn set_comms_scheme(&mut self, is_ask: bool) {
+        let scheme = if is_ask { ModulationScheme::ASK } else { ModulationScheme::FSK };
+        self.modulator.set_scheme(scheme);
+        self.demodulator.set_scheme(scheme);
     }
 
     pub fn send_message(&mut self, text: &str) {

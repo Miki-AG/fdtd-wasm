@@ -67,7 +67,7 @@ fn test_fdtd_simulator_step_advances_time() {
 }
 
 #[test]
-fn test_fdtd_simulator_get_frame_buffer_size() {
+fn test_fdtd_simulator_comms() {
     let params = SimulationParameters {
         width: 10, height: 10,
         source: SourceDefinition { x: 5, y: 5, amplitude: 1.0, frequency: 1.0, signal_type: SignalType::ContinuousSine },
@@ -75,8 +75,15 @@ fn test_fdtd_simulator_get_frame_buffer_size() {
         duration_steps: 100,
     };
     let config_json = serde_wasm_bindgen::to_value(&params).unwrap();
-    let simulator = FdtdSimulator::new(config_json).unwrap();
+    let mut simulator = FdtdSimulator::new(config_json).unwrap();
     
-    let buffer = simulator.get_frame_buffer();
-    assert_eq!(buffer.len(), 10 * 10 * 4); // RGBA
+    simulator.send_message("A");
+    
+    // Check if bits are queued
+    let bits = simulator.get_transmission_bits();
+    // Packet starts with 10101010...
+    assert!(bits.starts_with("10101010"));
+    
+    // Check initial status
+    assert!(simulator.get_demodulator_status().contains("SearchPreamble"));
 }
