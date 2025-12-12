@@ -10,12 +10,30 @@ function generateReport() {
 
     // --- Discover Public API Functions ---
     const srcDir = path.join(__dirname, 'src');
-    const rustFiles = fs.readdirSync(srcDir).filter(file => file.endsWith('.rs'));
+    
+    // Recursive function to find Rust files
+    function findRustFiles(dir) {
+        let results = [];
+        const list = fs.readdirSync(dir);
+        list.forEach(file => {
+            const filePath = path.join(dir, file);
+            const stat = fs.statSync(filePath);
+            if (stat && stat.isDirectory()) {
+                results = results.concat(findRustFiles(filePath));
+            } else if (file.endsWith('.rs')) {
+                results.push(filePath);
+            }
+        });
+        return results;
+    }
 
-    for (const file of rustFiles) {
-        const filePath = path.join(srcDir, file);
+    const rustFiles = findRustFiles(srcDir);
+
+    for (const filePath of rustFiles) {
         const content = fs.readFileSync(filePath, 'utf8');
-        const moduleName = path.basename(file, '.rs'); // e.g., 'parameters', 'state'
+        // Extract module name relative to src/
+        let moduleName = path.relative(srcDir, filePath).replace('.rs', '').replace(path.sep, '::').replace('::mod', '');
+        if (moduleName === 'lib') moduleName = 'lib';
 
         // Regex to find 'pub fn'
         let fnMatch;
@@ -103,14 +121,12 @@ function generateReport() {
         // Precise matching: prefer test names that also contain the module name or struct name to avoid ambiguity
         let matchingTest = actualTestResults.find(tr => {
             // Strong match: test name contains both module/struct name AND function name
-            const structOrMod = api.name.split('::')[0].toLowerCase();
-            return tr.name.toLowerCase().includes(structOrMod) && tr.name.includes(api.rawFnName);
+            // Handle module paths like comms::modulator
+            const pathParts = api.name.split('::');
+            const simpleName = pathParts[pathParts.length - 1];
+            // Just check simple name first for robustness in this simple project
+            return tr.name.includes(api.rawFnName);
         });
-
-        // Fallback: just function name
-        if (!matchingTest) {
-            matchingTest = actualTestResults.find(tr => tr.name.includes(api.rawFnName));
-        }
 
         if (matchingTest) {
             const isWasmTest = matchingTest.name.includes('fdtd_simulator');
@@ -128,20 +144,27 @@ function generateReport() {
     const columns = [
         ['parameters', 'state', 'rasterizer'], // Column 1
         ['renderer', 'engine', 'step'],       // Column 2
-        ['lib', 'utils']                      // Column 3
+        ['lib', 'utils', 'comms::modulator', 'comms::demodulator'] // Column 3
     ];
     
     const groupedApis = {};
     columns.flat().forEach(m => groupedApis[m] = []);
     
     publicApis.forEach(api => {
-        if (!groupedApis[api.module]) {
-            groupedApis[api.module] = [];
-            if (!columns.flat().includes(api.module)) {
-                columns[2].push(api.module);
+        let modKey = api.module;
+        if (!groupedApis[modKey]) {
+            // Try to fuzzy match or default
+            if (columns.flat().includes(modKey)) {
+                groupedApis[modKey] = [];
+            } else {
+                // If sub-module not explicitly listed, check parent or dump to Col 3
+                if (!columns[2].includes(modKey)) {
+                     columns[2].push(modKey);
+                     groupedApis[modKey] = [];
+                }
             }
         }
-        groupedApis[api.module].push(api);
+        groupedApis[modKey].push(api);
     });
 
     const totalApis = publicApis.length;
@@ -156,9 +179,14 @@ function generateReport() {
             const apis = groupedApis[mod];
             if (!apis || apis.length === 0) return;
 
+            // Format module title (e.g. comms::modulator -> Comms Modulator)
+            const title = mod.replace('::', ' ').split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ') + ' Module';
+
             colContent += `
                 <div class="module-group">
-                    <h2>${mod.charAt(0).toUpperCase() + mod.slice(1)} Module</h2>
+                    <h2>${title}</h2>
                     <table>
                         <thead>
                             <tr>

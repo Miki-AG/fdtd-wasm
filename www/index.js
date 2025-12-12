@@ -15,6 +15,11 @@ const scenarioSelect = document.getElementById('scenarioSelect');
 const statsDiv = document.getElementById('stats');
 const gainSlider = document.getElementById('gainSlider');
 const gainValueLabel = document.getElementById('gainValue');
+const msgInput = document.getElementById('msgInput');
+const sendBtn = document.getElementById('sendBtn');
+const txBitsSpan = document.getElementById('txBits');
+const rxBitsSpan = document.getElementById('rxBits');
+const rxTextSpan = document.getElementById('rxText');
 
 const WIDTH = 1000;
 const HEIGHT = 600;
@@ -24,6 +29,68 @@ canvas.height = HEIGHT;
 
 let currentScenarioConfig = null; 
 let signalHistory = new Array(100).fill(0); // 100px wide
+
+function draw() {
+    if (!simulator) return;
+
+    const bufferPtr = simulator.get_frame_buffer(); 
+    const imageData = new ImageData(new Uint8ClampedArray(bufferPtr), WIDTH, HEIGHT);
+    ctx.putImageData(imageData, 0, 0);
+
+    if (currentScenarioConfig) {
+        ctx.beginPath();
+        ctx.arc(currentScenarioConfig.source.x, currentScenarioConfig.source.y, 4, 0, 2 * Math.PI);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        if (currentScenarioConfig.receiver) {
+            ctx.beginPath();
+            ctx.arc(currentScenarioConfig.receiver.x, currentScenarioConfig.receiver.y, 4, 0, 2 * Math.PI);
+            ctx.fillStyle = 'white';
+            ctx.fill();
+            ctx.strokeStyle = 'blue';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+    }
+}
+
+function updateStats() {
+    if (simulator) {
+        statsDiv.textContent = `Step: ${simulator.get_current_step()}`;
+    }
+}
+
+function updateCommsUI() {
+    if (simulator) {
+        rxBitsSpan.textContent = simulator.get_received_bits().slice(-32); // Show last 32 bits
+        rxTextSpan.textContent = simulator.get_received_text();
+    }
+}
+
+function drawSignal() {
+    signalCtx.fillStyle = '#000';
+    signalCtx.fillRect(0, 0, 100, 100);
+    
+    signalCtx.beginPath();
+    signalCtx.strokeStyle = '#0f0'; // Green scope trace
+    signalCtx.lineWidth = 1;
+    
+    const zoom = parseFloat(gainSlider.value); // Use slider value
+    const midY = 50;
+    
+    for (let i = 0; i < 100; i++) {
+        const val = signalHistory[i];
+        // Plot
+        const y = midY - val * zoom;
+        if (i === 0) signalCtx.moveTo(i, y);
+        else signalCtx.lineTo(i, y);
+    }
+    signalCtx.stroke();
+}
 
 // ... createParabolaPath ... (unchanged)
 
@@ -151,6 +218,26 @@ async function run() {
     gainSlider.addEventListener('input', (e) => {
         gainValueLabel.textContent = `${e.target.value}x`;
     });
+
+    sendBtn.addEventListener('click', () => {
+        console.log("Send clicked. Simulator:", !!simulator, "Msg:", msgInput.value);
+        if (simulator && msgInput.value) {
+            console.log("Sending message...");
+            simulator.send_message(msgInput.value);
+            const bits = simulator.get_transmission_bits();
+            console.log("Bits:", bits);
+            txBitsSpan.textContent = bits;
+            msgInput.value = '';
+            
+            // Start simulation if not running
+            if (!isRunning) {
+                console.log("Starting simulation...");
+                startSimulation();
+            } else {
+                console.log("Simulation already running.");
+            }
+        }
+    });
 }
 
 function resetSimulation() {
@@ -197,74 +284,25 @@ function renderLoop() {
     for (let i = 0; i < 5; i++) {
         simulator.step();
         
-        // Capture signal every step (or every N steps if too fast, but 5/frame is fine)
+        // Capture signal every step
         if (currentScenarioConfig && currentScenarioConfig.receiver) {
             const val = simulator.get_field_at(currentScenarioConfig.receiver.x, currentScenarioConfig.receiver.y);
+            
+            // 1. Plotting
             signalHistory.push(val);
             signalHistory.shift();
+
+            // 2. Demodulation
+            simulator.process_receiver_signal(val);
         }
     }
 
     draw();
     drawSignal();
     updateStats();
+    updateCommsUI(); // New
 
     animationId = requestAnimationFrame(renderLoop);
-}
-
-function drawSignal() {
-    signalCtx.fillStyle = '#000';
-    signalCtx.fillRect(0, 0, 100, 100);
-    
-    signalCtx.beginPath();
-    signalCtx.strokeStyle = '#0f0'; // Green scope trace
-    signalCtx.lineWidth = 1;
-    
-    const zoom = parseFloat(gainSlider.value); // Use slider value
-    const midY = 50;
-    
-    for (let i = 0; i < 100; i++) {
-        const val = signalHistory[i];
-        // Plot
-        const y = midY - val * zoom;
-        if (i === 0) signalCtx.moveTo(i, y);
-        else signalCtx.lineTo(i, y);
-    }
-    signalCtx.stroke();
-}
-
-function draw() {
-    if (!simulator) return;
-
-    const bufferPtr = simulator.get_frame_buffer(); 
-    const imageData = new ImageData(new Uint8ClampedArray(bufferPtr), WIDTH, HEIGHT);
-    ctx.putImageData(imageData, 0, 0);
-
-    if (currentScenarioConfig) {
-        ctx.beginPath();
-        ctx.arc(currentScenarioConfig.source.x, currentScenarioConfig.source.y, 4, 0, 2 * Math.PI);
-        ctx.fillStyle = 'white';
-        ctx.fill();
-        ctx.strokeStyle = 'red';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-
-        if (currentScenarioConfig.receiver) {
-            ctx.beginPath();
-            ctx.arc(currentScenarioConfig.receiver.x, currentScenarioConfig.receiver.y, 4, 0, 2 * Math.PI);
-            ctx.fillStyle = 'white';
-            ctx.fill();
-            ctx.strokeStyle = 'blue';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-        }
-    }
-}
-
-function updateStats() {
-    if (simulator) {
-        statsDiv.textContent = `Step: ${simulator.get_current_step()}`;
-    }
 }
 
 run();

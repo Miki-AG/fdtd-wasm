@@ -3,21 +3,21 @@ use fdtd_wasm::state::SimulationState;
 
 #[test]
 fn test_map_value_to_color_zero() {
-    let color = map_value_to_color(0.0);
+    let color = map_value_to_color(0.0, 0.0);
     // Expect Black: [0, 0, 0, 255]
     assert_eq!(color, [0, 0, 0, 255]);
 }
 
 #[test]
 fn test_map_value_to_color_positive_max() {
-    let color = map_value_to_color(1.0);
+    let color = map_value_to_color(1.0, 0.0);
     // Expect Red: [255, 0, 0, 255]
     assert_eq!(color, [255, 0, 0, 255]);
 }
 
 #[test]
 fn test_map_value_to_color_negative_max() {
-    let color = map_value_to_color(-1.0);
+    let color = map_value_to_color(-1.0, 0.0);
     // Expect Blue: [0, 0, 255, 255]
     assert_eq!(color, [0, 0, 255, 255]);
 }
@@ -25,18 +25,18 @@ fn test_map_value_to_color_negative_max() {
 #[test]
 fn test_map_value_clamping() {
     // > 1.0 should stay Red
-    let color_high = map_value_to_color(2.0);
+    let color_high = map_value_to_color(2.0, 0.0);
     assert_eq!(color_high, [255, 0, 0, 255]);
 
     // < -1.0 should stay Blue
-    let color_low = map_value_to_color(-2.0);
+    let color_low = map_value_to_color(-2.0, 0.0);
     assert_eq!(color_low, [0, 0, 255, 255]);
 }
 
 #[test]
 fn test_map_value_intermediate() {
     // 0.5 should be dark red (e.g., 127 or 128)
-    let color = map_value_to_color(0.5);
+    let color = map_value_to_color(0.5, 0.0);
     assert_eq!(color[1], 0); // Green
     assert_eq!(color[2], 0); // Blue
     assert!(color[0] > 100 && color[0] < 200); // Red channel in range
