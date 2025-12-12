@@ -23,6 +23,27 @@ fn test_map_value_to_color_negative_max() {
 }
 
 #[test]
+fn test_map_value_clamping() {
+    // > 1.0 should stay Red
+    let color_high = map_value_to_color(2.0);
+    assert_eq!(color_high, [255, 0, 0, 255]);
+
+    // < -1.0 should stay Blue
+    let color_low = map_value_to_color(-2.0);
+    assert_eq!(color_low, [0, 0, 255, 255]);
+}
+
+#[test]
+fn test_map_value_intermediate() {
+    // 0.5 should be dark red (e.g., 127 or 128)
+    let color = map_value_to_color(0.5);
+    assert_eq!(color[1], 0); // Green
+    assert_eq!(color[2], 0); // Blue
+    assert!(color[0] > 100 && color[0] < 200); // Red channel in range
+    assert_eq!(color[3], 255); // Alpha
+}
+
+#[test]
 fn test_render_output_size() {
     let state = SimulationState::new(10, 10); // 100 pixels
     let buffer = render(&state);
