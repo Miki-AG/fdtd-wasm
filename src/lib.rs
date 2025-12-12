@@ -28,6 +28,11 @@ impl FdtdSimulator {
     pub fn new(val: JsValue) -> Result<FdtdSimulator, JsValue> {
         utils::set_panic_hook();
         let params: SimulationParameters = serde_wasm_bindgen::from_value(val)?;
+        
+        if let Err(e) = parameters::validate_parameters(&params) {
+            return Err(JsValue::from_str(&e));
+        }
+
         let width = params.width;
         let height = params.height;
         let freq = params.source.frequency;

@@ -13,8 +13,8 @@ fn test_step_advances_time() {
     let mut state = SimulationState::new(10, 10);
     
     assert_eq!(state.time_step, 0);
-    step(&params, &mut state);
-    assert_eq!(state.time_step, 1);
-    step(&params, &mut state);
+    step(&params, &mut state, None);
+    assert!(state.time_step == 1);
+    step(&params, &mut state, None);
     assert_eq!(state.time_step, 2);
 }

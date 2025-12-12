@@ -2,8 +2,9 @@ use fdtd_wasm::FdtdSimulator;
 use fdtd_wasm::parameters::{SimulationParameters, SourceDefinition, SignalType};
 use wasm_bindgen::JsValue;
 use serde_wasm_bindgen;
+use wasm_bindgen_test::*;
 
-#[test]
+#[wasm_bindgen_test]
 fn test_fdtd_simulator_new_succeeds_with_valid_config() {
     let params = SimulationParameters {
         width: 10, height: 10,
@@ -19,7 +20,7 @@ fn test_fdtd_simulator_new_succeeds_with_valid_config() {
     assert_eq!(simulator.get_current_step(), 0);
 }
 
-#[test]
+#[wasm_bindgen_test]
 fn test_fdtd_simulator_new_fails_with_invalid_config() {
     let malformed_json = JsValue::from_str(r#"{"height": 10, "source": {"x":0,"y":0,"amplitude":1,"frequency":1}, "obstacles":[], "duration_steps":1}"#);
     let simulator = FdtdSimulator::new(malformed_json);
@@ -36,7 +37,7 @@ fn test_fdtd_simulator_new_fails_with_invalid_config() {
     assert!(simulator_invalid.is_err());
 }
 
-#[test]
+#[wasm_bindgen_test]
 fn test_fdtd_simulator_get_current_step() {
     let params = SimulationParameters {
         width: 10, height: 10,
@@ -50,7 +51,7 @@ fn test_fdtd_simulator_get_current_step() {
     assert_eq!(simulator.get_current_step(), 0);
 }
 
-#[test]
+#[wasm_bindgen_test]
 fn test_fdtd_simulator_step_advances_time() {
     let params = SimulationParameters {
         width: 10, height: 10,
@@ -66,7 +67,7 @@ fn test_fdtd_simulator_step_advances_time() {
     assert_eq!(simulator.get_current_step(), 1);
 }
 
-#[test]
+#[wasm_bindgen_test]
 fn test_fdtd_simulator_comms() {
     let params = SimulationParameters {
         width: 10, height: 10,
