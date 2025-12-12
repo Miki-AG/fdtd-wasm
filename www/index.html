@@ -37,6 +37,9 @@
     <div id="signalContainer">
         <div id="signalLabel">Received Signal</div>
         <canvas id="signalCanvas" width="100" height="100"></canvas>
+        <div id="signalLabel" style="margin-top: 5px;">Spectrum (FFT)</div>
+        <canvas id="fftCanvas" width="100" height="100" style="border: 1px solid #333; background: #000;"></canvas>
+        
         <div style="margin-top: 5px; width: 100%; display: flex; flex-direction: column; align-items: center;">
             <label for="gainSlider" style="font-size: 10px;">Gain: <span id="gainValue">5x</span></label>
             <input type="range" id="gainSlider" min="1" max="100" value="5" style="width: 90%;">
@@ -51,6 +54,10 @@
             Rx: <span id="rxBits"></span><br>
             Text: <span id="rxText" style="color: #0f0;"></span>
         </div>
+    </div>
+    
+    <div id="packetStatusContainer" style="margin-top: 5px; font-family: sans-serif; font-size: 12px; color: #888;">
+        Packet Stage: <span id="packetState">Idle</span>
     </div>
 
     <div id="controls">
@@ -70,8 +77,8 @@
         <div id="stats">Step: 0</div>
     </div>
 
-          <script type="module" src="./index.js?v=3"></script>
+              <script type="module" src="./index.js?v=4"></script>
 
-      </body>
+          </body>
 
-      </html>
+          </html>

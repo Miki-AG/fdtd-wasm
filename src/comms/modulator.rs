@@ -32,7 +32,31 @@ impl Modulator {
     }
 
     pub fn load_text(&mut self, text: &str) {
-        self.bits = text_to_bits(text);
+        // Construct Packet
+        let mut data = Vec::new();
+        data.push(0xAA); // Preamble
+        data.push(0x7E); // Sync
+        let len = text.len().min(255) as u8;
+        data.push(len);  // Length
+        
+        let payload_bytes = text.as_bytes();
+        data.extend_from_slice(&payload_bytes[0..len as usize]);
+        
+        // CRC (Simple Sum)
+        let sum: u16 = payload_bytes.iter().map(|&b| b as u16).sum();
+        data.push((sum % 256) as u8);
+        
+        // Convert to bits (MSB first logic needed for packet decoder?)
+        // Decoder shifts << 1 | bit. So MSB first.
+        // My previous text_to_bits was MSB first (7..0). Good.
+        
+        self.bits.clear();
+        for byte in data {
+            for i in (0..8).rev() {
+                self.bits.push((byte >> i) & 1);
+            }
+        }
+        
         self.current_bit_idx = 0;
         self.sample_counter = 0;
     }

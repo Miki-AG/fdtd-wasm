@@ -100,6 +100,10 @@ impl FdtdSimulator {
         self.demodulator.get_bits_string()
     }
 
+    pub fn get_demodulator_status(&self) -> String {
+        self.demodulator.get_state_string()
+    }
+
     /// Returns a pointer to the image buffer (RGBA) for the current state.
     pub fn get_frame_buffer(&self) -> Vec<u8> {
         renderer::render(&self.state)

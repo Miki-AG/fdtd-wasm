@@ -1,13 +1,18 @@
+use crate::comms::packet::{PacketDecoder, PacketState};
+
 pub struct Demodulator {
     samples_per_symbol: usize,
     sample_counter: usize,
     freq_0: f64,
     freq_1: f64,
-    // I/Q Accumulators for Freq 0 and Freq 1
     i0: f64, q0: f64,
     i1: f64, q1: f64,
-    received_bits: Vec<u8>,
-    decoded_text: String,
+    
+    decoder: PacketDecoder,
+    last_message: String,
+    
+    // Debugging info
+    received_bits_debug: String,
 }
 
 impl Demodulator {
@@ -19,18 +24,16 @@ impl Demodulator {
             freq_1,
             i0: 0.0, q0: 0.0,
             i1: 0.0, q1: 0.0,
-            received_bits: Vec::new(),
-            decoded_text: String::new(),
+            decoder: PacketDecoder::new(),
+            last_message: String::new(),
+            received_bits_debug: String::new(),
         }
     }
 
-    /// Processes a single field sample.
-    /// Returns Some(bit) if a symbol period just finished and a bit was decided.
     pub fn process_sample(&mut self, value: f64, t: f64) -> Option<u8> {
         let omega0 = 2.0 * std::f64::consts::PI * self.freq_0;
         let omega1 = 2.0 * std::f64::consts::PI * self.freq_1;
 
-        // Correlate
         self.i0 += value * (omega0 * t).cos();
         self.q0 += value * (omega0 * t).sin();
         self.i1 += value * (omega1 * t).cos();
@@ -39,60 +42,55 @@ impl Demodulator {
         self.sample_counter += 1;
 
         if self.sample_counter >= self.samples_per_symbol {
-            // Decision time
             let energy0 = self.i0.powi(2) + self.q0.powi(2);
             let energy1 = self.i1.powi(2) + self.q1.powi(2);
 
-            let bit = if energy1 > energy0 { 1 } else { 0 };
-
-            // Store bit
-            self.received_bits.push(bit);
-            
-            // Try decode text (every 8 bits)
-            if self.received_bits.len() % 8 == 0 {
-                let byte_idx = self.received_bits.len() / 8 - 1;
-                let chunk = &self.received_bits[byte_idx * 8 .. (byte_idx + 1) * 8];
-                let mut byte = 0u8;
-                for (i, &b) in chunk.iter().enumerate() {
-                    if b == 1 {
-                        byte |= 1 << (7 - i); // MSB first
-                    }
-                }
-                self.decoded_text.push(byte as char);
+            // Squelch
+            if energy0 + energy1 < 1.0 {
+                self.reset_accumulators();
+                return None;
             }
 
-            // Reset
-            self.sample_counter = 0;
-            self.i0 = 0.0; self.q0 = 0.0;
-            self.i1 = 0.0; self.q1 = 0.0;
+            let bit = if energy1 > energy0 { 1 } else { 0 };
+            
+            // Debug
+            self.received_bits_debug.push(if bit == 1 { '1' } else { '0' });
+            if self.received_bits_debug.len() > 64 {
+                self.received_bits_debug.drain(0..1); // Keep last 64
+            }
 
+            // Feed Packet Decoder
+            if let Some(msg) = self.decoder.push_bit(bit) {
+                self.last_message = msg;
+            }
+
+            self.reset_accumulators();
             return Some(bit);
         }
 
         None
     }
+    
+    fn reset_accumulators(&mut self) {
+        self.sample_counter = 0;
+        self.i0 = 0.0; self.q0 = 0.0;
+        self.i1 = 0.0; self.q1 = 0.0;
+    }
 
     pub fn get_text(&self) -> String {
-        self.decoded_text.clone()
+        self.last_message.clone()
     }
     
     pub fn get_bits_string(&self) -> String {
-        self.received_bits.iter().map(|b| b.to_string()).collect()
+        self.received_bits_debug.clone()
+    }
+    
+    pub fn get_state_string(&self) -> String {
+        format!("{:?}", self.decoder.get_state())
     }
 }
 
 pub fn bits_to_text(bits: &[u8]) -> String {
-    let mut text = String::new();
-    for chunk in bits.chunks(8) {
-        if chunk.len() == 8 {
-            let mut byte = 0u8;
-            for (i, &b) in chunk.iter().enumerate() {
-                if b == 1 {
-                    byte |= 1 << (7 - i);
-                }
-            }
-            text.push(byte as char);
-        }
-    }
-    text
+    // Legacy helper, might remove
+    String::new() 
 }

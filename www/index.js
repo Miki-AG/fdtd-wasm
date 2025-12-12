@@ -1,13 +1,22 @@
 import init, { FdtdSimulator } from '../pkg/fdtd_wasm.js';
 
+// --- Globals ---
 let simulator = null;
 let animationId = null;
 let isRunning = false;
+let currentScenarioConfig = null; 
+let signalHistory = new Array(100).fill(0); // 100px wide
 
+const WIDTH = 1000;
+const HEIGHT = 600;
+
+// --- DOM Elements ---
 const canvas = document.getElementById('simCanvas');
 const ctx = canvas.getContext('2d');
 const signalCanvas = document.getElementById('signalCanvas');
 const signalCtx = signalCanvas.getContext('2d');
+const fftCanvas = document.getElementById('fftCanvas');
+const fftCtx = fftCanvas.getContext('2d');
 const toggleBtn = document.getElementById('toggleBtn');
 const resetBtn = document.getElementById('resetBtn');
 const signalSelect = document.getElementById('signalType');
@@ -20,84 +29,14 @@ const sendBtn = document.getElementById('sendBtn');
 const txBitsSpan = document.getElementById('txBits');
 const rxBitsSpan = document.getElementById('rxBits');
 const rxTextSpan = document.getElementById('rxText');
-
-const WIDTH = 1000;
-const HEIGHT = 600;
+const packetStateSpan = document.getElementById('packetState');
 
 canvas.width = WIDTH;
 canvas.height = HEIGHT;
 
-let currentScenarioConfig = null; 
-let signalHistory = new Array(100).fill(0); // 100px wide
-
-function draw() {
-    if (!simulator) return;
-
-    const bufferPtr = simulator.get_frame_buffer(); 
-    const imageData = new ImageData(new Uint8ClampedArray(bufferPtr), WIDTH, HEIGHT);
-    ctx.putImageData(imageData, 0, 0);
-
-    if (currentScenarioConfig) {
-        ctx.beginPath();
-        ctx.arc(currentScenarioConfig.source.x, currentScenarioConfig.source.y, 4, 0, 2 * Math.PI);
-        ctx.fillStyle = 'white';
-        ctx.fill();
-        ctx.strokeStyle = 'red';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-
-        if (currentScenarioConfig.receiver) {
-            ctx.beginPath();
-            ctx.arc(currentScenarioConfig.receiver.x, currentScenarioConfig.receiver.y, 4, 0, 2 * Math.PI);
-            ctx.fillStyle = 'white';
-            ctx.fill();
-            ctx.strokeStyle = 'blue';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-        }
-    }
-}
-
-function updateStats() {
-    if (simulator) {
-        statsDiv.textContent = `Step: ${simulator.get_current_step()}`;
-    }
-}
-
-function updateCommsUI() {
-    if (simulator) {
-        rxBitsSpan.textContent = simulator.get_received_bits().slice(-32); // Show last 32 bits
-        rxTextSpan.textContent = simulator.get_received_text();
-    }
-}
-
-function drawSignal() {
-    signalCtx.fillStyle = '#000';
-    signalCtx.fillRect(0, 0, 100, 100);
-    
-    signalCtx.beginPath();
-    signalCtx.strokeStyle = '#0f0'; // Green scope trace
-    signalCtx.lineWidth = 1;
-    
-    const zoom = parseFloat(gainSlider.value); // Use slider value
-    const midY = 50;
-    
-    for (let i = 0; i < 100; i++) {
-        const val = signalHistory[i];
-        // Plot
-        const y = midY - val * zoom;
-        if (i === 0) signalCtx.moveTo(i, y);
-        else signalCtx.lineTo(i, y);
-    }
-    signalCtx.stroke();
-}
-
-// ... createParabolaPath ... (unchanged)
+// --- Helper Functions ---
 
 function createParabolaPath(vertexX, vertexY, focalLength, height, openingRight = true) {
-    // Equation: x = a*(y - k)^2 + h
-    // a = 1 / (4 * f)
-    // h = vertexX, k = vertexY
     const a = 1.0 / (4.0 * focalLength);
     const direction = openingRight ? 1.0 : -1.0;
     
@@ -124,8 +63,6 @@ function createParabolaPath(vertexX, vertexY, focalLength, height, openingRight 
     path += "Z";
     return path;
 }
-
-// ... getScenarioConfig ... (unchanged)
 
 function getScenarioConfig(type) {
     const freq = 0.05;
@@ -169,10 +106,9 @@ function getScenarioConfig(type) {
                 x: WIDTH * 3 / 4,
                 y: HEIGHT / 2
             },
-            obstacles: [] // No obstacles
+            obstacles: []
         };
     } else {
-        // Default Box
         return {
             source: {
                 x: WIDTH / 4,
@@ -192,8 +128,6 @@ function getScenarioConfig(type) {
     }
 }
 
-// ... rest ...
-
 function getConfig() {
     currentScenarioConfig = getScenarioConfig(scenarioSelect.value);
     return {
@@ -205,44 +139,73 @@ function getConfig() {
     };
 }
 
-async function run() {
-    await init();
-
-    resetSimulation();
-
-    toggleBtn.addEventListener('click', toggleSimulation);
-    resetBtn.addEventListener('click', resetSimulation);
-    signalSelect.addEventListener('change', resetSimulation);
-    scenarioSelect.addEventListener('change', resetSimulation);
-    
-    gainSlider.addEventListener('input', (e) => {
-        gainValueLabel.textContent = `${e.target.value}x`;
-    });
-
-    sendBtn.addEventListener('click', () => {
-        console.log("Send clicked. Simulator:", !!simulator, "Msg:", msgInput.value);
-        if (simulator && msgInput.value) {
-            console.log("Sending message...");
-            simulator.send_message(msgInput.value);
-            const bits = simulator.get_transmission_bits();
-            console.log("Bits:", bits);
-            txBitsSpan.textContent = bits;
-            msgInput.value = '';
-            
-            // Start simulation if not running
-            if (!isRunning) {
-                console.log("Starting simulation...");
-                startSimulation();
-            } else {
-                console.log("Simulation already running.");
-            }
-        }
-    });
+function updateCommsUI() {
+    if (simulator) {
+        if (rxBitsSpan) rxBitsSpan.textContent = simulator.get_received_bits().slice(-64);
+        if (rxTextSpan) rxTextSpan.textContent = simulator.get_received_text();
+        if (packetStateSpan) packetStateSpan.textContent = simulator.get_demodulator_status();
+    }
 }
+
+function drawSignal() {
+    signalCtx.fillStyle = '#000';
+    signalCtx.fillRect(0, 0, 100, 100);
+    
+    signalCtx.beginPath();
+    signalCtx.strokeStyle = '#0f0';
+    signalCtx.lineWidth = 1;
+    
+    const zoom = parseFloat(gainSlider.value);
+    const midY = 50;
+    
+    for (let i = 0; i < 100; i++) {
+        const val = signalHistory[i];
+        const y = midY - val * zoom;
+        if (i === 0) signalCtx.moveTo(i, y);
+        else signalCtx.lineTo(i, y);
+    }
+    signalCtx.stroke();
+}
+
+function draw() {
+    if (!simulator) return;
+
+    const bufferPtr = simulator.get_frame_buffer(); 
+    const imageData = new ImageData(new Uint8ClampedArray(bufferPtr), WIDTH, HEIGHT);
+    ctx.putImageData(imageData, 0, 0);
+
+    if (currentScenarioConfig) {
+        ctx.beginPath();
+        ctx.arc(currentScenarioConfig.source.x, currentScenarioConfig.source.y, 4, 0, 2 * Math.PI);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        if (currentScenarioConfig.receiver) {
+            ctx.beginPath();
+            ctx.arc(currentScenarioConfig.receiver.x, currentScenarioConfig.receiver.y, 4, 0, 2 * Math.PI);
+            ctx.fillStyle = 'white';
+            ctx.fill();
+            ctx.strokeStyle = 'blue';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+    }
+}
+
+function updateStats() {
+    if (simulator) {
+        statsDiv.textContent = `Step: ${simulator.get_current_step()}`;
+    }
+}
+
+// --- Simulation Logic ---
 
 function resetSimulation() {
     stopSimulation();
-    signalHistory.fill(0); // Clear history
+    signalHistory.fill(0);
     
     try {
         const config = getConfig();
@@ -284,15 +247,10 @@ function renderLoop() {
     for (let i = 0; i < 5; i++) {
         simulator.step();
         
-        // Capture signal every step
         if (currentScenarioConfig && currentScenarioConfig.receiver) {
             const val = simulator.get_field_at(currentScenarioConfig.receiver.x, currentScenarioConfig.receiver.y);
-            
-            // 1. Plotting
             signalHistory.push(val);
             signalHistory.shift();
-
-            // 2. Demodulation
             simulator.process_receiver_signal(val);
         }
     }
@@ -300,9 +258,45 @@ function renderLoop() {
     draw();
     drawSignal();
     updateStats();
-    updateCommsUI(); // New
+    updateCommsUI();
 
     animationId = requestAnimationFrame(renderLoop);
+}
+
+// --- Initialization ---
+
+async function run() {
+    await init();
+
+    resetSimulation();
+
+    toggleBtn.addEventListener('click', toggleSimulation);
+    resetBtn.addEventListener('click', resetSimulation);
+    signalSelect.addEventListener('change', resetSimulation);
+    scenarioSelect.addEventListener('change', resetSimulation);
+    
+    gainSlider.addEventListener('input', (e) => {
+        gainValueLabel.textContent = `${e.target.value}x`;
+    });
+
+    sendBtn.addEventListener('click', () => {
+        console.log("Send clicked. Simulator:", !!simulator, "Msg:", msgInput.value);
+        if (simulator && msgInput.value) {
+            console.log("Sending message...");
+            simulator.send_message(msgInput.value);
+            const bits = simulator.get_transmission_bits();
+            console.log("Bits:", bits);
+            txBitsSpan.textContent = bits;
+            msgInput.value = '';
+            
+            if (!isRunning) {
+                console.log("Starting simulation...");
+                startSimulation();
+            } else {
+                console.log("Simulation already running.");
+            }
+        }
+    });
 }
 
 run();
