@@ -25,6 +25,7 @@ const statsDiv = document.getElementById('stats');
 const gainSlider = document.getElementById('gainSlider');
 const gainValueLabel = document.getElementById('gainValue');
 const modulationSelect = document.getElementById('modulationSelect');
+const rateSlider = document.getElementById('rateSlider');
 const msgInput = document.getElementById('msgInput');
 const sendBtn = document.getElementById('sendBtn');
 const txBitsSpan = document.getElementById('txBits');
@@ -341,6 +342,16 @@ async function run() {
 
     gainSlider.addEventListener('input', (e) => {
         gainValueLabel.textContent = `${e.target.value}x`;
+    });
+
+    rateSlider.addEventListener('input', (e) => {
+        if (simulator) {
+            const val = parseInt(e.target.value, 10);
+            // Inverted logic: High Slider = High Rate = Low Duration
+            // min(0) -> 200 samples. max(180) -> 20 samples.
+            const samples = 200 - val;
+            simulator.set_symbol_duration(samples);
+        }
     });
 
     sendBtn.addEventListener('click', () => {

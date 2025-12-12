@@ -80,6 +80,11 @@ impl FdtdSimulator {
         self.demodulator.set_scheme(scheme);
     }
 
+    pub fn set_symbol_duration(&mut self, samples: usize) {
+        self.modulator.set_samples_per_symbol(samples);
+        self.demodulator.set_samples_per_symbol(samples);
+    }
+
     pub fn send_message(&mut self, text: &str) {
         self.modulator.load_text(text);
         self.is_transmitting = true;

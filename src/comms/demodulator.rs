@@ -37,6 +37,10 @@ impl Demodulator {
         self.scheme = scheme;
     }
 
+    pub fn set_samples_per_symbol(&mut self, n: usize) {
+        self.samples_per_symbol = n;
+    }
+
     pub fn process_sample(&mut self, value: f64, t: f64) -> Option<u8> {
         let omega0 = 2.0 * std::f64::consts::PI * self.freq_0;
         let omega1 = 2.0 * std::f64::consts::PI * self.freq_1;

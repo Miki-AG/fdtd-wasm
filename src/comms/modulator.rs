@@ -43,6 +43,10 @@ impl Modulator {
         self.scheme = scheme;
     }
 
+    pub fn set_samples_per_symbol(&mut self, n: usize) {
+        self.samples_per_symbol = n;
+    }
+
     pub fn load_text(&mut self, text: &str) {
         // Construct Packet
         let mut data = Vec::new();
