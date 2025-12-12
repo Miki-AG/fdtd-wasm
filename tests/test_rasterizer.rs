@@ -40,3 +40,39 @@ fn test_fill_path_on_grid_square() {
     // Check corner is empty (0.0)
     assert_eq!(grid[0], 0.0);
 }
+
+use fdtd_wasm::rasterizer::{rasterize_path, rasterize_obstacles};
+
+#[test]
+fn test_rasterize_path_delegates_correctly() {
+    let width = 10;
+    let height = 10;
+    let mut grid = vec![0.0; width * height];
+    let path = "M 3 3 L 7 3 L 7 7 L 3 7 Z";
+    
+    rasterize_path(width, height, path, &mut grid);
+    
+    // Check center (should be filled)
+    assert_eq!(grid[5 * width + 5], 1.0);
+}
+
+#[test]
+fn test_rasterize_obstacles_multiple_paths() {
+    let width = 10;
+    let height = 10;
+    // Two small squares: one at (1,1), one at (8,8)
+    // Simplified paths for testing logic flow
+    let paths = vec![
+        "M 1 1 L 2 1 L 2 2 L 1 2 Z".to_string(),
+        "M 8 8 L 9 8 L 9 9 L 8 9 Z".to_string(),
+    ];
+    
+    let mask = rasterize_obstacles(width, height, &paths);
+    
+    // Check first obstacle
+    assert_eq!(mask[1 * width + 1], 1.0);
+    // Check second obstacle
+    assert_eq!(mask[8 * width + 8], 1.0);
+    // Check empty space
+    assert_eq!(mask[5 * width + 5], 0.0);
+}

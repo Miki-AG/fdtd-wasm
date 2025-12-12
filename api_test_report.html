@@ -10,33 +10,34 @@
         h2 { font-size: 13px; margin-top: 5px; margin-bottom: 5px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 3px; }
         .summary { font-size: 11px; margin-bottom: 10px; font-weight: bold; text-align: center; background: white; padding: 8px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         
-        /* Flexbox Layout */
-        .flex-container {
+        /* Column Container */
+        .columns-container {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between; /* Distributes items with space between them */
-            gap: 10px; /* Space between flex items */
-            margin-bottom: 10px;
+            gap: 10px;
+            align-items: flex-start; /* Prevent stretching height */
         }
         
+        .column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 0; /* Allow flex shrinking */
+        }
+
         .module-group { 
             background: white; 
             padding: 8px; 
             border-radius: 4px; 
             box-shadow: 0 1px 2px rgba(0,0,0,0.1); 
-            flex: 1 1 calc(33.333% - 10px); /* Grow, shrink, base width for 3 columns with 10px gap */
-            min-width: 250px; /* Minimum width to prevent items from becoming too narrow */
-            box-sizing: border-box; /* Include padding and border in the element's total width and height */
         }
 
-        /* Ensure "Discovered Tests" takes full width */
         .full-width-section {
-            flex-basis: 100%; /* Take full width */
-            margin-top: 10px; /* Add some space above */
+            margin-top: 10px;
         }
 
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border-bottom: 1px solid #ddd; padding: 3px; text-align: left; }
+        table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+        th, td { border-bottom: 1px solid #ddd; padding: 3px; text-align: left; word-wrap: break-word; }
         th { background-color: #f8f8f8; color: #555; }
         tr:last-child td { border-bottom: none; }
         
@@ -48,286 +49,282 @@
         ul { columns: 3; -webkit-columns: 3; -moz-columns: 3; font-size: 10px; padding-left: 15px; margin: 0; }
         li { margin-bottom: 1px; }
 
-        @media (max-width: 900px) {
-            .module-group { flex: 1 1 calc(50% - 10px); } /* 2 columns */
-            ul { columns: 2; -webkit-columns: 2; -moz-columns: 2; }
-        }
-        @media (max-width: 600px) {
-            .module-group { flex: 1 1 100%; } /* 1 column */
-            ul { columns: 1; -webkit-columns: 1; -moz-columns: 1; }
+        @media (max-width: 700px) {
+            .columns-container { flex-direction: column; }
+            ul { columns: 1; }
         }
     </style>
 </head>
 <body>
     <h1>API & Test Coverage Report</h1>
     <div class="summary">
-        Date: 12/11/2025, 9:11:17 PM<br>
-        Total APIs: 27 | APIs with Tests: 19 | APIs without Tests: 8
+        Date: 12/11/2025, 9:15:33 PM<br>
+        Total APIs: 27 | APIs with Tests: 27 | APIs without Tests: 0
     </div>
 
-    <div class="flex-container">
-        
-            <div class="module-group">
-                <h2>Parameters Module</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>API Name</th>
-                            <th>Test Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        
-                        <tr>
-                            <td>parameters::validate_parameters</td>
-                            <td class="status-Fail">Fail</td>
-                        </tr>
+    <div class="columns-container">
+        <div class="column">
+                <div class="module-group">
+                    <h2>Parameters Module</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>API Name</th>
+                                <th>Test Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
             
-                    </tbody>
-                </table>
+                            <tr>
+                                <td>parameters::validate_parameters</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                        </tbody>
+                    </table>
+                </div>
+            
+                <div class="module-group">
+                    <h2>State Module</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>API Name</th>
+                                <th>Test Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            
+                            <tr>
+                                <td>state::new</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                            <tr>
+                                <td>state::reset</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                            <tr>
+                                <td>SimulationState::new</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                        </tbody>
+                    </table>
+                </div>
+            
+                <div class="module-group">
+                    <h2>Rasterizer Module</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>API Name</th>
+                                <th>Test Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            
+                            <tr>
+                                <td>rasterizer::rasterize_obstacles</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                            <tr>
+                                <td>rasterizer::rasterize_path</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                            <tr>
+                                <td>rasterizer::parse_svg_path</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                            <tr>
+                                <td>rasterizer::fill_path_on_grid</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                        </tbody>
+                    </table>
+                </div>
+            </div><div class="column">
+                <div class="module-group">
+                    <h2>Renderer Module</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>API Name</th>
+                                <th>Test Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            
+                            <tr>
+                                <td>renderer::render</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                            <tr>
+                                <td>renderer::map_value_to_color</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                        </tbody>
+                    </table>
+                </div>
+            
+                <div class="module-group">
+                    <h2>Engine Module</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>API Name</th>
+                                <th>Test Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            
+                            <tr>
+                                <td>engine::update_hx</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                            <tr>
+                                <td>engine::update_hy</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                            <tr>
+                                <td>engine::update_e_fields</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                            <tr>
+                                <td>engine::apply_source</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                            <tr>
+                                <td>engine::apply_boundary_left</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                            <tr>
+                                <td>engine::apply_boundary_right</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                            <tr>
+                                <td>engine::apply_boundary_top</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                            <tr>
+                                <td>engine::apply_boundary_bottom</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                            <tr>
+                                <td>engine::compute_source_signal</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                        </tbody>
+                    </table>
+                </div>
+            
+                <div class="module-group">
+                    <h2>Step Module</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>API Name</th>
+                                <th>Test Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            
+                            <tr>
+                                <td>step::step</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                        </tbody>
+                    </table>
+                </div>
+            </div><div class="column">
+                <div class="module-group">
+                    <h2>Lib Module</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>API Name</th>
+                                <th>Test Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            
+                            <tr>
+                                <td>lib::new</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                            <tr>
+                                <td>lib::step</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                            <tr>
+                                <td>lib::get_frame_buffer</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                            <tr>
+                                <td>lib::get_current_step</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                            <tr>
+                                <td>FdtdSimulator::new</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                        </tbody>
+                    </table>
+                </div>
+            
+                <div class="module-group">
+                    <h2>Utils Module</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>API Name</th>
+                                <th>Test Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            
+                            <tr>
+                                <td>utils::log</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                            <tr>
+                                <td>utils::set_panic_hook</td>
+                                <td class="status-Fail">Fail</td>
+                            </tr>
+                
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        
-            <div class="module-group">
-                <h2>State Module</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>API Name</th>
-                            <th>Test Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        
-                        <tr>
-                            <td>state::new</td>
-                            <td class="status-Fail">Fail</td>
-                        </tr>
-            
-                        <tr>
-                            <td>state::reset</td>
-                            <td class="status-NoTest">No Test</td>
-                        </tr>
-            
-                        <tr>
-                            <td>SimulationState::new</td>
-                            <td class="status-Fail">Fail</td>
-                        </tr>
-            
-                    </tbody>
-                </table>
-            </div>
-        
-            <div class="module-group">
-                <h2>Rasterizer Module</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>API Name</th>
-                            <th>Test Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        
-                        <tr>
-                            <td>rasterizer::rasterize_obstacles</td>
-                            <td class="status-NoTest">No Test</td>
-                        </tr>
-            
-                        <tr>
-                            <td>rasterizer::rasterize_path</td>
-                            <td class="status-NoTest">No Test</td>
-                        </tr>
-            
-                        <tr>
-                            <td>rasterizer::parse_svg_path</td>
-                            <td class="status-Fail">Fail</td>
-                        </tr>
-            
-                        <tr>
-                            <td>rasterizer::fill_path_on_grid</td>
-                            <td class="status-Fail">Fail</td>
-                        </tr>
-            
-                    </tbody>
-                </table>
-            </div>
-        
-            <div class="module-group">
-                <h2>Renderer Module</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>API Name</th>
-                            <th>Test Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        
-                        <tr>
-                            <td>renderer::render</td>
-                            <td class="status-Fail">Fail</td>
-                        </tr>
-            
-                        <tr>
-                            <td>renderer::map_value_to_color</td>
-                            <td class="status-Fail">Fail</td>
-                        </tr>
-            
-                    </tbody>
-                </table>
-            </div>
-        
-            <div class="module-group">
-                <h2>Engine Module</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>API Name</th>
-                            <th>Test Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        
-                        <tr>
-                            <td>engine::update_hx</td>
-                            <td class="status-NoTest">No Test</td>
-                        </tr>
-            
-                        <tr>
-                            <td>engine::update_hy</td>
-                            <td class="status-NoTest">No Test</td>
-                        </tr>
-            
-                        <tr>
-                            <td>engine::update_e_fields</td>
-                            <td class="status-NoTest">No Test</td>
-                        </tr>
-            
-                        <tr>
-                            <td>engine::apply_source</td>
-                            <td class="status-Fail">Fail</td>
-                        </tr>
-            
-                        <tr>
-                            <td>engine::apply_boundary_left</td>
-                            <td class="status-Fail">Fail</td>
-                        </tr>
-            
-                        <tr>
-                            <td>engine::apply_boundary_right</td>
-                            <td class="status-Fail">Fail</td>
-                        </tr>
-            
-                        <tr>
-                            <td>engine::apply_boundary_top</td>
-                            <td class="status-Fail">Fail</td>
-                        </tr>
-            
-                        <tr>
-                            <td>engine::apply_boundary_bottom</td>
-                            <td class="status-Fail">Fail</td>
-                        </tr>
-            
-                        <tr>
-                            <td>engine::compute_source_signal</td>
-                            <td class="status-Fail">Fail</td>
-                        </tr>
-            
-                    </tbody>
-                </table>
-            </div>
-        
-            <div class="module-group">
-                <h2>Step Module</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>API Name</th>
-                            <th>Test Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        
-                        <tr>
-                            <td>step::step</td>
-                            <td class="status-Fail">Fail</td>
-                        </tr>
-            
-                    </tbody>
-                </table>
-            </div>
-        
-            <div class="module-group">
-                <h2>Lib Module</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>API Name</th>
-                            <th>Test Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        
-                        <tr>
-                            <td>lib::new</td>
-                            <td class="status-Fail">Fail</td>
-                        </tr>
-            
-                        <tr>
-                            <td>lib::step</td>
-                            <td class="status-Fail">Fail</td>
-                        </tr>
-            
-                        <tr>
-                            <td>lib::get_frame_buffer</td>
-                            <td class="status-Fail">Fail</td>
-                        </tr>
-            
-                        <tr>
-                            <td>lib::get_current_step</td>
-                            <td class="status-Fail">Fail</td>
-                        </tr>
-            
-                        <tr>
-                            <td>FdtdSimulator::new</td>
-                            <td class="status-Fail">Fail</td>
-                        </tr>
-            
-                    </tbody>
-                </table>
-            </div>
-        
-            <div class="module-group">
-                <h2>Utils Module</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>API Name</th>
-                            <th>Test Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        
-                        <tr>
-                            <td>utils::log</td>
-                            <td class="status-NoTest">No Test</td>
-                        </tr>
-            
-                        <tr>
-                            <td>utils::set_panic_hook</td>
-                            <td class="status-NoTest">No Test</td>
-                        </tr>
-            
-                    </tbody>
-                </table>
-            </div>
-        
     </div>
 
     <div class="module-group full-width-section">
         <h2>Discovered Tests</h2>
         <ul>
-<li>test_compute_source_signal_zero_time</li><li>test_compute_source_signal_peak</li><li>test_compute_source_signal_zero_crossing</li><li>test_apply_boundary_left_does_not_panic</li><li>test_apply_boundary_right_does_not_panic</li><li>test_apply_boundary_top_does_not_panic</li><li>test_apply_boundary_bottom_does_not_panic</li><li>test_update_fields_no_source_remains_zero</li><li>test_apply_source_injects_value</li><li>test_validate_parameters_valid</li><li>test_validate_parameters_invalid_dimensions</li><li>test_validate_parameters_source_out_of_bounds</li><li>test_validate_parameters_negative_frequency</li><li>test_validate_parameters_zero_duration</li><li>test_parse_svg_path_simple_rect</li><li>test_fill_path_on_grid_square</li><li>test_map_value_to_color_zero</li><li>test_map_value_to_color_positive_max</li><li>test_map_value_to_color_negative_max</li><li>test_render_output_size</li><li>test_fdtd_simulator_new_succeeds_with_valid_config</li><li>test_fdtd_simulator_new_fails_with_invalid_config</li><li>test_fdtd_simulator_get_current_step</li><li>test_fdtd_simulator_step_advances_time</li><li>test_fdtd_simulator_get_frame_buffer_size</li><li>test_state_new_initialization</li><li>test_step_advances_time</li>
+<li>test_compute_source_signal_zero_time</li><li>test_compute_source_signal_peak</li><li>test_compute_source_signal_zero_crossing</li><li>test_apply_boundary_left_does_not_panic</li><li>test_apply_boundary_right_does_not_panic</li><li>test_apply_boundary_top_does_not_panic</li><li>test_apply_boundary_bottom_does_not_panic</li><li>test_update_fields_no_source_remains_zero</li><li>test_apply_source_injects_value</li><li>test_update_hx_logic</li><li>test_update_hy_logic</li><li>test_update_e_fields_logic</li><li>test_validate_parameters_valid</li><li>test_validate_parameters_invalid_dimensions</li><li>test_validate_parameters_source_out_of_bounds</li><li>test_validate_parameters_negative_frequency</li><li>test_validate_parameters_zero_duration</li><li>test_parse_svg_path_simple_rect</li><li>test_fill_path_on_grid_square</li><li>test_rasterize_path_delegates_correctly</li><li>test_rasterize_obstacles_multiple_paths</li><li>test_map_value_to_color_zero</li><li>test_map_value_to_color_positive_max</li><li>test_map_value_to_color_negative_max</li><li>test_render_output_size</li><li>test_fdtd_simulator_new_succeeds_with_valid_config</li><li>test_fdtd_simulator_new_fails_with_invalid_config</li><li>test_fdtd_simulator_get_current_step</li><li>test_fdtd_simulator_step_advances_time</li><li>test_fdtd_simulator_get_frame_buffer_size</li><li>test_state_new_initialization</li><li>test_state_reset</li><li>test_step_advances_time</li><li>test_set_panic_hook_does_not_crash</li>
         </ul>
     </div>
 </body>

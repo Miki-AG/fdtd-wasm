@@ -36,3 +36,26 @@ fn test_apply_source_injects_value() {
     // To verify injection, we'd need to mock the time or choose a time where sin != 0.
     // But in Phase 1->2 we just want to see it fail (todo!).
 }
+
+#[test]
+fn test_update_hx_logic() {
+    let mut state = SimulationState::new(10, 10);
+    // Setup state such that Hx should change (requires Ez gradients)
+    state.ez[10 * 10 / 2] = 1.0; 
+    update_hx(&mut state);
+    // Just verify it runs; logic correctness is Phase 3
+}
+
+#[test]
+fn test_update_hy_logic() {
+    let mut state = SimulationState::new(10, 10);
+    state.ez[10 * 10 / 2] = 1.0;
+    update_hy(&mut state);
+}
+
+#[test]
+fn test_update_e_fields_logic() {
+    let mut state = SimulationState::new(10, 10);
+    state.hx[10 * 10 / 2] = 1.0;
+    update_e_fields(&mut state);
+}

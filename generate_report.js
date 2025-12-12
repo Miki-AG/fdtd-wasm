@@ -25,7 +25,7 @@ function generateReport() {
                 module: moduleName,
                 name: `${moduleName}::${fnMatch[1]}`,
                 rawFnName: fnMatch[1],
-                type: 'function', // Still capture type internally, but not display
+                type: 'function',
                 hasTest: false,
                 status: 'No Test',
             });
@@ -45,7 +45,7 @@ function generateReport() {
                     module: moduleName,
                     name: `${structName}::${methodMatch[1]}`,
                     rawFnName: methodMatch[1],
-                    type: 'method', // Still capture type internally
+                    type: 'method',
                     hasTest: false,
                     status: 'No Test',
                 });
@@ -109,16 +109,23 @@ function generateReport() {
     }
 
     // --- GROUP BY MODULE ---
-    const moduleOrder = ['parameters', 'state', 'rasterizer', 'renderer', 'engine', 'step', 'lib', 'utils'];
+    // Explicitly distribute modules into 3 columns
+    const columns = [
+        ['parameters', 'state', 'rasterizer'], // Column 1
+        ['renderer', 'engine', 'step'],       // Column 2
+        ['lib', 'utils']                      // Column 3
+    ];
     
     // Create a map of Module -> APIs
     const groupedApis = {};
-    moduleOrder.forEach(m => groupedApis[m] = []);
+    columns.flat().forEach(m => groupedApis[m] = []);
+    
+    // Handle any extra modules not in list by adding them to the last column
     publicApis.forEach(api => {
         if (!groupedApis[api.module]) {
             groupedApis[api.module] = [];
-            if (!moduleOrder.includes(api.module)) {
-                moduleOrder.push(api.module);
+            if (!columns.flat().includes(api.module)) {
+                columns[2].push(api.module);
             }
         }
         groupedApis[api.module].push(api);
@@ -128,39 +135,45 @@ function generateReport() {
     const apisWithTests = publicApis.filter(api => api.hasTest).length;
     const apisWithoutTests = totalApis - apisWithTests;
 
-    let flexItemsHtml = ''; // Change from tablesHtml to flexItemsHtml
-    for (const mod of moduleOrder) {
-        const apis = groupedApis[mod];
-        if (!apis || apis.length === 0) continue;
+    let columnsHtml = '';
+    
+    columns.forEach(moduleList => {
+        let colContent = '<div class="column">';
+        moduleList.forEach(mod => {
+            const apis = groupedApis[mod];
+            if (!apis || apis.length === 0) return;
 
-        flexItemsHtml += `
-            <div class="module-group">
-                <h2>${mod.charAt(0).toUpperCase() + mod.slice(1)} Module</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>API Name</th>
-                            <th>Test Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
-        
-        apis.forEach(api => {
-            flexItemsHtml += `
-                        <tr>
-                            <td>${api.name}</td>
-                            <td class="status-${api.status.replace(/[\s\(\)\/]/g, '')}">${api.status}</td>
-                        </tr>
+            colContent += `
+                <div class="module-group">
+                    <h2>${mod.charAt(0).toUpperCase() + mod.slice(1)} Module</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>API Name</th>
+                                <th>Test Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            apis.forEach(api => {
+                colContent += `
+                            <tr>
+                                <td>${api.name}</td>
+                                <td class="status-${api.status.replace(/[\s\(\)\/]/g, '')}">${api.status}</td>
+                            </tr>
+                `;
+            });
+
+            colContent += `
+                        </tbody>
+                    </table>
+                </div>
             `;
         });
-
-        flexItemsHtml += `
-                    </tbody>
-                </table>
-            </div>
-        `;
-    }
+        colContent += '</div>';
+        columnsHtml += colContent;
+    });
 
     const htmlContent = `
 <!DOCTYPE html>
@@ -174,33 +187,34 @@ function generateReport() {
         h2 { font-size: 13px; margin-top: 5px; margin-bottom: 5px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 3px; }
         .summary { font-size: 11px; margin-bottom: 10px; font-weight: bold; text-align: center; background: white; padding: 8px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         
-        /* Flexbox Layout */
-        .flex-container {
+        /* Column Container */
+        .columns-container {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between; /* Distributes items with space between them */
-            gap: 10px; /* Space between flex items */
-            margin-bottom: 10px;
+            gap: 10px;
+            align-items: flex-start; /* Prevent stretching height */
         }
         
+        .column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 0; /* Allow flex shrinking */
+        }
+
         .module-group { 
             background: white; 
             padding: 8px; 
             border-radius: 4px; 
             box-shadow: 0 1px 2px rgba(0,0,0,0.1); 
-            flex: 1 1 calc(33.333% - 10px); /* Grow, shrink, base width for 3 columns with 10px gap */
-            min-width: 250px; /* Minimum width to prevent items from becoming too narrow */
-            box-sizing: border-box; /* Include padding and border in the element's total width and height */
         }
 
-        /* Ensure "Discovered Tests" takes full width */
         .full-width-section {
-            flex-basis: 100%; /* Take full width */
-            margin-top: 10px; /* Add some space above */
+            margin-top: 10px;
         }
 
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border-bottom: 1px solid #ddd; padding: 3px; text-align: left; }
+        table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+        th, td { border-bottom: 1px solid #ddd; padding: 3px; text-align: left; word-wrap: break-word; }
         th { background-color: #f8f8f8; color: #555; }
         tr:last-child td { border-bottom: none; }
         
@@ -212,13 +226,9 @@ function generateReport() {
         ul { columns: 3; -webkit-columns: 3; -moz-columns: 3; font-size: 10px; padding-left: 15px; margin: 0; }
         li { margin-bottom: 1px; }
 
-        @media (max-width: 900px) {
-            .module-group { flex: 1 1 calc(50% - 10px); } /* 2 columns */
-            ul { columns: 2; -webkit-columns: 2; -moz-columns: 2; }
-        }
-        @media (max-width: 600px) {
-            .module-group { flex: 1 1 100%; } /* 1 column */
-            ul { columns: 1; -webkit-columns: 1; -moz-columns: 1; }
+        @media (max-width: 700px) {
+            .columns-container { flex-direction: column; }
+            ul { columns: 1; }
         }
     </style>
 </head>
@@ -229,8 +239,8 @@ function generateReport() {
         Total APIs: ${totalApis} | APIs with Tests: ${apisWithTests} | APIs without Tests: ${apisWithoutTests}
     </div>
 
-    <div class="flex-container">
-        ${flexItemsHtml}
+    <div class="columns-container">
+        ${columnsHtml}
     </div>
 
     <div class="module-group full-width-section">
