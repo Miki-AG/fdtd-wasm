@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FDTD WASM Simulator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: row;
+      align-items: start;
+      background: #222;
+      color: #eee;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    canvas {
+      border: 1px solid #555;
+      background: #000;
+    }
+
+    #controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: start;
+      justify-content: start;
+      margin: 10px;
+    }
+
+    button {
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #stats {
+      font-family: monospace;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="simCanvas"></canvas>
+  <div id="controls">
+    <h1>2D FDTD Simulator </h1>
+    <p>WASM + Rust</p>
+    <button id="toggleBtn">Start</button>
+    <button id="resetBtn">Reset</button>
+    <div id="stats">Step: 0</div>
+  </div>
+
+  <script type="module" src="./index.js"></script>
+</body>
+
+</html>
