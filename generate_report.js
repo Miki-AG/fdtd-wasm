@@ -115,6 +115,7 @@ function generateReport() {
     const manualTestMapping = {
         'comms::demodulator::process_sample': ['test_demodulator_perfect_signal_fsk', 'test_demodulator_perfect_signal_ask'],
         'comms::demodulator::get_text': ['test_demodulator_perfect_signal_fsk'], // Indirectly typically checked via decoding
+        'comms::demodulator::get_partial_text': ['test_packet_decoder_state_transitions'],
         'comms::demodulator::new': ['test_demodulator_perfect_signal_fsk'],
         'comms::demodulator::set_scheme': ['test_demodulator_perfect_signal_ask'],
         'comms::packet::push_bit': ['test_text_to_bits_conversion'], // Implicit in packet forming
