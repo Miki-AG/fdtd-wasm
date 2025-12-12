@@ -32,7 +32,10 @@ function generateReport() {
     for (const filePath of rustFiles) {
         const content = fs.readFileSync(filePath, 'utf8');
         // Extract module name relative to src/
-        let moduleName = path.relative(srcDir, filePath).replace('.rs', '').replace(path.sep, '::').replace('::mod', '');
+        let moduleName = path.relative(srcDir, filePath).replace('.rs', '').split(path.sep).join('::');
+        if (moduleName.endsWith('::mod')) {
+            moduleName = moduleName.substring(0, moduleName.length - 5);
+        }
         if (moduleName === 'lib') moduleName = 'lib';
 
         // Regex to find 'pub fn'
@@ -87,14 +90,6 @@ function generateReport() {
     }
 
     // --- Correlate API with Tests ---
-    for (const api of publicApis) {
-        if (discoveredTests.some(testName => testName.includes(api.rawFnName))) {
-            api.hasTest = true;
-            api.status = 'Test Written (Status Unknown)';
-        }
-    }
-
-    // --- Run cargo test ---
     let cargoTestOutput = '';
     let actualTestResults = [];
     try {
@@ -122,8 +117,8 @@ function generateReport() {
         'comms::demodulator::get_text': ['test_demodulator_perfect_signal_fsk'], // Indirectly typically checked via decoding
         'comms::demodulator::new': ['test_demodulator_perfect_signal_fsk'],
         'comms::packet::push_bit': ['test_text_to_bits_conversion'], // Implicit in packet forming
-        'commsulator::next_modulation': ['test_modulator_sequence_fsk', 'test_modulator_ask'],
-        'commsulator::load_text': ['test_modulator_sequence_fsk'],
+        'comms::modulator::next_modulation': ['test_modulator_sequence_fsk', 'test_modulator_ask'],
+        'comms::modulator::load_text': ['test_modulator_sequence_fsk'],
     };
 
     // APIs that are tested in WASM environment (wasm-pack test) but not cargo test
@@ -177,9 +172,9 @@ function generateReport() {
 
     // --- GROUP BY MODULE ---
     const columns = [
-        ['parameters', 'state', 'rasterizer'], // Column 1
-        ['renderer', 'engine', 'step'],       // Column 2
-        ['lib', 'utils', 'comms::modulator', 'comms::demodulator'] // Column 3
+        ['parameters', 'state', 'rasterizer', 'renderer'], // Column 1 (4 modules)
+        ['engine', 'step', 'lib', 'utils'],                // Column 2 (4 modules)
+        ['comms::modulator', 'comms::demodulator', 'comms::packet'] // Column 3 (Rest/Comms)
     ];
 
     const groupedApis = {};
