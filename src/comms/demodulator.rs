@@ -69,7 +69,11 @@ impl Demodulator {
                     // Or simpler: FSK used 1.0 squelch.
                     // If Energy1 > 10.0 (High) -> 1. Else -> 0.
                     // Need to tune this.
-                    if energy1 > 50.0 { 1 } else { 0 }
+                    if self.sample_counter == self.samples_per_symbol {
+                         // crate::utils::log(&format!("ASK Energy: {:.2}", energy1));
+                    }
+                    
+                    if energy1 > 800.0 { 1 } else { 0 }
                 }
             };
             
