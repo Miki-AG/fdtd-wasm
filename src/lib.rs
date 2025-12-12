@@ -4,6 +4,7 @@ pub mod engine;
 pub mod rasterizer;
 pub mod utils;
 pub mod step;
+pub mod renderer;
 
 use wasm_bindgen::prelude::*;
 use parameters::SimulationParameters;
@@ -32,7 +33,7 @@ impl FdtdSimulator {
     /// This is a simplified interface; in reality we might return a raw pointer or a Uint8ClampedArray.
     /// For Phase 1, we define the signature.
     pub fn get_frame_buffer(&self) -> Vec<u8> {
-        todo!("Map Ez fields to colors (Black->Red/Blue) and return RGBA buffer")
+        renderer::render(&self.state)
     }
     
     /// Returns the current simulation time step.

@@ -3,149 +3,186 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Rust Test Report</title>
+    <title>API & Test Coverage Report</title>
     <style>
         body { font-family: sans-serif; padding: 20px; }
         h1 { margin-bottom: 10px; }
         .summary { margin-bottom: 20px; font-weight: bold; }
         .pass { color: green; }
         .fail { color: red; }
-        table { border-collapse: collapse; width: 100%; max-width: 800px; }
+        .untested { color: orange; }
+        table { border-collapse: collapse; width: 100%; max-width: 1000px; margin-top: 20px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #f2f2f2; }
         tr:nth-child(even) { background-color: #f9f9f9; }
-        .status-ok { background-color: #dff0d8; color: #3c763d; }
-        .status-FAILED { background-color: #f2dede; color: #a94442; }
+        .status-Pass { background-color: #dff0d8; color: #3c763d; }
+        .status-Fail { background-color: #f2dede; color: #a94442; }
+        .status-NoTest { background-color: #fcf8e3; color: #8a6d3b; }
+        .status-Unknown { background-color: #d9edf7; color: #31708f; } /* For 'Test Written (Status Unknown)' */
     </style>
 </head>
 <body>
-    <h1>Rust Test Report</h1>
+    <h1>API & Test Coverage Report</h1>
     <div class="summary">
-        Date: 12/11/2025, 9:00:30 PM<br>
-        Total: 27 | <span class="pass">Passed: 0</span> | <span class="fail">Failed: 27</span>
+        Date: 12/11/2025, 9:01:17 PM<br>
+        Total APIs: 27 | APIs with Tests: 1 | APIs without Tests: 26
     </div>
-    
+
+    <h2>API Functions & Methods Overview</h2>
     <table>
         <thead>
             <tr>
-                <th>Test Name</th>
-                <th>Status</th>
+                <th>API Name</th>
+                <th>Type</th>
+                <th>Test Status</th>
             </tr>
         </thead>
         <tbody>
 
             <tr>
-                <td>test_compute_source_signal_peak</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>engine::update_hx</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_compute_source_signal_zero_crossing</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>engine::update_hy</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_compute_source_signal_zero_time</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>engine::update_e_fields</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_apply_boundary_right_does_not_panic</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>engine::apply_source</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_apply_boundary_left_does_not_panic</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>engine::apply_boundary_left</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_apply_boundary_top_does_not_panic</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>engine::apply_boundary_right</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_apply_boundary_bottom_does_not_panic</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>engine::apply_boundary_top</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_apply_source_injects_value</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>engine::apply_boundary_bottom</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_update_fields_no_source_remains_zero</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>engine::compute_source_signal</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_validate_parameters_zero_duration</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>lib::new</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_validate_parameters_valid</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>lib::step</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_validate_parameters_negative_frequency</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>lib::get_frame_buffer</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_validate_parameters_source_out_of_bounds</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>lib::get_current_step</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_validate_parameters_invalid_dimensions</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>FdtdSimulator::new</td>
+                <td>method</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_parse_svg_path_simple_rect</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>parameters::validate_parameters</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_fill_path_on_grid_square</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>rasterizer::rasterize_obstacles</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_map_value_to_color_positive_max</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>rasterizer::rasterize_path</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_map_value_to_color_zero</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>rasterizer::parse_svg_path</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_map_value_to_color_negative_max</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>rasterizer::fill_path_on_grid</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_render_output_size</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>renderer::render</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_fdtd_simulator_step_advances_time</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>renderer::map_value_to_color</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_fdtd_simulator_get_current_step</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>state::new</td>
+                <td>function</td>
+                <td class="status-Fail">Fail</td>
             </tr>
             <tr>
-                <td>test_fdtd_simulator_new_succeeds_with_valid_config</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>state::reset</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_fdtd_simulator_new_fails_with_invalid_config</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>SimulationState::new</td>
+                <td>method</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_fdtd_simulator_get_frame_buffer_size</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>step::step</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_state_new_initialization</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>utils::log</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
             <tr>
-                <td>test_step_advances_time</td>
-                <td class="status-FAILED">FAILED</td>
+                <td>utils::set_panic_hook</td>
+                <td>function</td>
+                <td class="status-NoTest">No Test</td>
             </tr>
         </tbody>
     </table>
+
+    <h2>Discovered Tests</h2>
+    <ul>
+<li>test_compute_source_signal_zero_time</li><li>test_compute_source_signal_peak</li><li>test_compute_source_signal_zero_crossing</li><li>test_apply_boundary_left_does_not_panic</li><li>test_apply_boundary_right_does_not_panic</li><li>test_apply_boundary_top_does_not_panic</li><li>test_apply_boundary_bottom_does_not_panic</li><li>test_update_fields_no_source_remains_zero</li><li>test_apply_source_injects_value</li><li>test_validate_parameters_valid</li><li>test_validate_parameters_invalid_dimensions</li><li>test_validate_parameters_source_out_of_bounds</li><li>test_validate_parameters_negative_frequency</li><li>test_validate_parameters_zero_duration</li><li>test_parse_svg_path_simple_rect</li><li>test_fill_path_on_grid_square</li><li>test_map_value_to_color_zero</li><li>test_map_value_to_color_positive_max</li><li>test_map_value_to_color_negative_max</li><li>test_render_output_size</li><li>test_fdtd_simulator_new_succeeds_with_valid_config</li><li>test_fdtd_simulator_new_fails_with_invalid_config</li><li>test_fdtd_simulator_get_current_step</li><li>test_fdtd_simulator_step_advances_time</li><li>test_fdtd_simulator_get_frame_buffer_size</li><li>test_state_new_initialization</li><li>test_step_advances_time</li>
+    </ul>
     
-    <h2>Raw Output</h2>
+    <h2>Raw Cargo Test Output</h2>
     <pre>
 running 0 tests
 
@@ -153,16 +190,11 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 
 
 running 3 tests
-test test_compute_source_signal_peak ... FAILED
 test test_compute_source_signal_zero_crossing ... FAILED
 test test_compute_source_signal_zero_time ... FAILED
+test test_compute_source_signal_peak ... FAILED
 
 failures:
-
----- test_compute_source_signal_peak stdout ----
-thread &#039;test_compute_source_signal_peak&#039; panicked at src/engine.rs:47:5:
-not yet implemented: Calculate A * sin(2 * pi * f * t)
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
 ---- test_compute_source_signal_zero_crossing stdout ----
 thread &#039;test_compute_source_signal_zero_crossing&#039; panicked at src/engine.rs:47:5:
@@ -170,6 +202,11 @@ not yet implemented: Calculate A * sin(2 * pi * f * t)
 
 ---- test_compute_source_signal_zero_time stdout ----
 thread &#039;test_compute_source_signal_zero_time&#039; panicked at src/engine.rs:47:5:
+not yet implemented: Calculate A * sin(2 * pi * f * t)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- test_compute_source_signal_peak stdout ----
+thread &#039;test_compute_source_signal_peak&#039; panicked at src/engine.rs:47:5:
 not yet implemented: Calculate A * sin(2 * pi * f * t)
 
 
@@ -182,29 +219,29 @@ test result: FAILED. 0 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; 
 
 
 running 4 tests
-test test_apply_boundary_right_does_not_panic ... FAILED
 test test_apply_boundary_left_does_not_panic ... FAILED
-test test_apply_boundary_top_does_not_panic ... FAILED
 test test_apply_boundary_bottom_does_not_panic ... FAILED
+test test_apply_boundary_top_does_not_panic ... FAILED
+test test_apply_boundary_right_does_not_panic ... FAILED
 
 failures:
 
----- test_apply_boundary_right_does_not_panic stdout ----
-thread &#039;test_apply_boundary_right_does_not_panic&#039; panicked at src/state.rs:25:9:
-not yet implemented: Initialize simulation state with zero fields
-
 ---- test_apply_boundary_left_does_not_panic stdout ----
 thread &#039;test_apply_boundary_left_does_not_panic&#039; panicked at src/state.rs:25:9:
-not yet implemented: Initialize simulation state with zero fields
-
----- test_apply_boundary_top_does_not_panic stdout ----
-thread &#039;test_apply_boundary_top_does_not_panic&#039; panicked at src/state.rs:25:9:
 not yet implemented: Initialize simulation state with zero fields
 
 ---- test_apply_boundary_bottom_does_not_panic stdout ----
 thread &#039;test_apply_boundary_bottom_does_not_panic&#039; panicked at src/state.rs:25:9:
 not yet implemented: Initialize simulation state with zero fields
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- test_apply_boundary_top_does_not_panic stdout ----
+thread &#039;test_apply_boundary_top_does_not_panic&#039; panicked at src/state.rs:25:9:
+not yet implemented: Initialize simulation state with zero fields
+
+---- test_apply_boundary_right_does_not_panic stdout ----
+thread &#039;test_apply_boundary_right_does_not_panic&#039; panicked at src/state.rs:25:9:
+not yet implemented: Initialize simulation state with zero fields
 
 
 failures:
@@ -217,18 +254,18 @@ test result: FAILED. 0 passed; 4 failed; 0 ignored; 0 measured; 0 filtered out; 
 
 
 running 2 tests
-test test_apply_source_injects_value ... FAILED
 test test_update_fields_no_source_remains_zero ... FAILED
+test test_apply_source_injects_value ... FAILED
 
 failures:
 
----- test_apply_source_injects_value stdout ----
-thread &#039;test_apply_source_injects_value&#039; panicked at src/state.rs:25:9:
+---- test_update_fields_no_source_remains_zero stdout ----
+thread &#039;test_update_fields_no_source_remains_zero&#039; panicked at src/state.rs:25:9:
 not yet implemented: Initialize simulation state with zero fields
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
----- test_update_fields_no_source_remains_zero stdout ----
-thread &#039;test_update_fields_no_source_remains_zero&#039; panicked at src/state.rs:25:9:
+---- test_apply_source_injects_value stdout ----
+thread &#039;test_apply_source_injects_value&#039; panicked at src/state.rs:25:9:
 not yet implemented: Initialize simulation state with zero fields
 
 
@@ -240,13 +277,26 @@ test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; 
 
 
 running 5 tests
+test test_validate_parameters_invalid_dimensions ... FAILED
+test test_validate_parameters_source_out_of_bounds ... FAILED
+test test_validate_parameters_negative_frequency ... FAILED
 test test_validate_parameters_zero_duration ... FAILED
 test test_validate_parameters_valid ... FAILED
-test test_validate_parameters_negative_frequency ... FAILED
-test test_validate_parameters_source_out_of_bounds ... FAILED
-test test_validate_parameters_invalid_dimensions ... FAILED
 
 failures:
+
+---- test_validate_parameters_invalid_dimensions stdout ----
+thread &#039;test_validate_parameters_invalid_dimensions&#039; panicked at src/parameters.rs:23:5:
+not yet implemented: Implement parameter validation
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- test_validate_parameters_source_out_of_bounds stdout ----
+thread &#039;test_validate_parameters_source_out_of_bounds&#039; panicked at src/parameters.rs:23:5:
+not yet implemented: Implement parameter validation
+
+---- test_validate_parameters_negative_frequency stdout ----
+thread &#039;test_validate_parameters_negative_frequency&#039; panicked at src/parameters.rs:23:5:
+not yet implemented: Implement parameter validation
 
 ---- test_validate_parameters_zero_duration stdout ----
 thread &#039;test_validate_parameters_zero_duration&#039; panicked at src/parameters.rs:23:5:
@@ -255,19 +305,6 @@ not yet implemented: Implement parameter validation
 ---- test_validate_parameters_valid stdout ----
 thread &#039;test_validate_parameters_valid&#039; panicked at src/parameters.rs:23:5:
 not yet implemented: Implement parameter validation
-
----- test_validate_parameters_negative_frequency stdout ----
-thread &#039;test_validate_parameters_negative_frequency&#039; panicked at src/parameters.rs:23:5:
-not yet implemented: Implement parameter validation
-
----- test_validate_parameters_source_out_of_bounds stdout ----
-thread &#039;test_validate_parameters_source_out_of_bounds&#039; panicked at src/parameters.rs:23:5:
-not yet implemented: Implement parameter validation
-
----- test_validate_parameters_invalid_dimensions stdout ----
-thread &#039;test_validate_parameters_invalid_dimensions&#039; panicked at src/parameters.rs:23:5:
-not yet implemented: Implement parameter validation
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
 
 failures:
@@ -304,16 +341,16 @@ test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; 
 
 
 running 4 tests
-test test_map_value_to_color_positive_max ... FAILED
+test test_render_output_size ... FAILED
 test test_map_value_to_color_zero ... FAILED
 test test_map_value_to_color_negative_max ... FAILED
-test test_render_output_size ... FAILED
+test test_map_value_to_color_positive_max ... FAILED
 
 failures:
 
----- test_map_value_to_color_positive_max stdout ----
-thread &#039;test_map_value_to_color_positive_max&#039; panicked at src/renderer.rs:16:5:
-not yet implemented: Implement color mapping logic (Gradient/LUT)
+---- test_render_output_size stdout ----
+thread &#039;test_render_output_size&#039; panicked at src/state.rs:25:9:
+not yet implemented: Initialize simulation state with zero fields
 
 ---- test_map_value_to_color_zero stdout ----
 thread &#039;test_map_value_to_color_zero&#039; panicked at src/renderer.rs:16:5:
@@ -322,11 +359,11 @@ not yet implemented: Implement color mapping logic (Gradient/LUT)
 ---- test_map_value_to_color_negative_max stdout ----
 thread &#039;test_map_value_to_color_negative_max&#039; panicked at src/renderer.rs:16:5:
 not yet implemented: Implement color mapping logic (Gradient/LUT)
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
----- test_render_output_size stdout ----
-thread &#039;test_render_output_size&#039; panicked at src/state.rs:25:9:
-not yet implemented: Initialize simulation state with zero fields
+---- test_map_value_to_color_positive_max stdout ----
+thread &#039;test_map_value_to_color_positive_max&#039; panicked at src/renderer.rs:16:5:
+not yet implemented: Implement color mapping logic (Gradient/LUT)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
 
 failures:
@@ -339,30 +376,30 @@ test result: FAILED. 0 passed; 4 failed; 0 ignored; 0 measured; 0 filtered out; 
 
 
 running 5 tests
+test test_fdtd_simulator_new_fails_with_invalid_config ... FAILED
 test test_fdtd_simulator_step_advances_time ... FAILED
 test test_fdtd_simulator_get_current_step ... FAILED
 test test_fdtd_simulator_new_succeeds_with_valid_config ... FAILED
-test test_fdtd_simulator_new_fails_with_invalid_config ... FAILED
 test test_fdtd_simulator_get_frame_buffer_size ... FAILED
 
 failures:
 
+---- test_fdtd_simulator_new_fails_with_invalid_config stdout ----
+thread &#039;test_fdtd_simulator_new_fails_with_invalid_config&#039; panicked at /Users/miguelarmengol/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-0.2.106/src/lib.rs:1255:1:
+function not implemented on non-wasm32 targets
+
 ---- test_fdtd_simulator_step_advances_time stdout ----
 thread &#039;test_fdtd_simulator_step_advances_time&#039; panicked at /Users/miguelarmengol/.cargo/registry/src/index.crates.io-6f17d22bba15001f/js-sys-0.3.83/src/lib.rs:3646:1:
 cannot call wasm-bindgen imported functions on non-wasm targets
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
 ---- test_fdtd_simulator_get_current_step stdout ----
 thread &#039;test_fdtd_simulator_get_current_step&#039; panicked at /Users/miguelarmengol/.cargo/registry/src/index.crates.io-6f17d22bba15001f/js-sys-0.3.83/src/lib.rs:3646:1:
 cannot call wasm-bindgen imported functions on non-wasm targets
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
 ---- test_fdtd_simulator_new_succeeds_with_valid_config stdout ----
 thread &#039;test_fdtd_simulator_new_succeeds_with_valid_config&#039; panicked at /Users/miguelarmengol/.cargo/registry/src/index.crates.io-6f17d22bba15001f/js-sys-0.3.83/src/lib.rs:3646:1:
 cannot call wasm-bindgen imported functions on non-wasm targets
-
----- test_fdtd_simulator_new_fails_with_invalid_config stdout ----
-thread &#039;test_fdtd_simulator_new_fails_with_invalid_config&#039; panicked at /Users/miguelarmengol/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-0.2.106/src/lib.rs:1255:1:
-function not implemented on non-wasm32 targets
 
 ---- test_fdtd_simulator_get_frame_buffer_size stdout ----
 thread &#039;test_fdtd_simulator_get_frame_buffer_size&#039; panicked at /Users/miguelarmengol/.cargo/registry/src/index.crates.io-6f17d22bba15001f/js-sys-0.3.83/src/lib.rs:3646:1:
@@ -618,7 +655,7 @@ warning: unused import: `std::f64::consts::PI`
   = note: `#[warn(unused_imports)]` on by default
 
 warning: `fdtd_wasm` (test &quot;test_engine_basics&quot;) generated 1 warning (run `cargo fix --test &quot;test_engine_basics&quot;` to apply 1 suggestion)
-    Finished test [unoptimized + debuginfo] target(s) in 0.01s
+    Finished test [unoptimized + debuginfo] target(s) in 0.05s
      Running unittests src/lib.rs (target/debug/deps/fdtd_wasm-9056a293140c4c63)
      Running tests/test_engine_basics.rs (target/debug/deps/test_engine_basics-989cd1d9b274a08d)
 error: test failed, to rerun pass `--test test_engine_basics`
