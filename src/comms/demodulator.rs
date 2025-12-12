@@ -100,6 +100,10 @@ impl Demodulator {
     pub fn get_text(&self) -> String {
         self.last_message.clone()
     }
+
+    pub fn get_partial_text(&self) -> String {
+        self.decoder.get_partial_payload()
+    }
     
     pub fn get_bits_string(&self) -> String {
         self.received_bits_debug.clone()

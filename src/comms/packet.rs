@@ -94,4 +94,8 @@ impl PacketDecoder {
     pub fn get_state(&self) -> PacketState {
         self.state
     }
+
+    pub fn get_partial_payload(&self) -> String {
+        String::from_utf8_lossy(&self.payload).to_string()
+    }
 }

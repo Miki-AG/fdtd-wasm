@@ -93,6 +93,10 @@ impl FdtdSimulator {
         self.demodulator.get_text()
     }
     
+    pub fn get_received_partial_text(&self) -> String {
+        self.demodulator.get_partial_text()
+    }
+    
     pub fn get_received_bits(&self) -> String {
         self.demodulator.get_bits_string()
     }

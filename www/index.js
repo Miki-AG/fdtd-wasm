@@ -143,7 +143,16 @@ function getConfig() {
 function updateCommsUI() {
     if (simulator) {
         if (rxBitsSpan) rxBitsSpan.textContent = simulator.get_received_bits().slice(-64);
-        if (rxTextSpan) rxTextSpan.textContent = simulator.get_received_text();
+        if (rxTextSpan) {
+            const partial = simulator.get_received_partial_text();
+            // If we are in the middle of a packet (partial is not empty), show it.
+            // Otherwise show the last confirmed full message.
+            if (partial && partial.length > 0) {
+                rxTextSpan.textContent = partial + "_"; // Add cursor to show it's active
+            } else {
+                rxTextSpan.textContent = simulator.get_received_text();
+            }
+        }
         if (packetStateSpan) packetStateSpan.textContent = simulator.get_demodulator_status();
     }
 }
