@@ -15,23 +15,23 @@ function generateReport() {
     for (const file of rustFiles) {
         const filePath = path.join(srcDir, file);
         const content = fs.readFileSync(filePath, 'utf8');
+        const moduleName = path.basename(file, '.rs'); // e.g., 'parameters', 'state'
 
         // Regex to find 'pub fn'
         let fnMatch;
-        // Captures function name and arguments
         const fnPattern = /pub fn\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^)]*)\)\s*(->\s*[^{]*)?/g;
         while ((fnMatch = fnPattern.exec(content)) !== null) {
             publicApis.push({
-                name: `${path.basename(file, '.rs')}::${fnMatch[1]}`,
-                rawFnName: fnMatch[1], // Store just the function name for easier matching
-                type: 'function',
-                hasTest: false, // Default
+                module: moduleName,
+                name: `${moduleName}::${fnMatch[1]}`,
+                rawFnName: fnMatch[1],
+                type: 'function', // Still capture type internally, but not display
+                hasTest: false,
                 status: 'No Test',
             });
         }
 
-        // Regex to find methods in 'impl' blocks for structs annotated with #[wasm_bindgen]
-        // This is a simplified regex, might need refinement for complex cases
+        // Regex to find methods in 'impl' blocks
         let implMatch;
         const implPattern = /impl\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\{([^}]*)\}/g;
         while ((implMatch = implPattern.exec(content)) !== null) {
@@ -42,9 +42,10 @@ function generateReport() {
             const methodPattern = /pub fn\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^)]*)\)\s*(->\s*[^{]*)?/g;
             while ((methodMatch = methodPattern.exec(implBody)) !== null) {
                 publicApis.push({
+                    module: moduleName,
                     name: `${structName}::${methodMatch[1]}`,
-                    rawFnName: methodMatch[1], // Store just the method name for easier matching
-                    type: 'method',
+                    rawFnName: methodMatch[1],
+                    type: 'method', // Still capture type internally
                     hasTest: false,
                     status: 'No Test',
                 });
@@ -67,21 +68,19 @@ function generateReport() {
         }
     }
 
-    // --- Correlate API with Tests (Revised Heuristic) ---
+    // --- Correlate API with Tests ---
     for (const api of publicApis) {
-        // Check if any test name contains the raw function/method name
         if (discoveredTests.some(testName => testName.includes(api.rawFnName))) {
             api.hasTest = true;
-            api.status = 'Test Written (Status Unknown)'; // We don't run tests yet to determine pass/fail
+            api.status = 'Test Written (Status Unknown)';
         }
     }
 
-    // --- Run cargo test to get actual results ---
+    // --- Run cargo test ---
     let cargoTestOutput = '';
     let actualTestResults = [];
     try {
         console.log('Running cargo test to get actual results...');
-        // Use --no-fail-fast to ensure all tests are attempted
         const result = execSync('cargo test --no-fail-fast --color never', { maxBuffer: 1024 * 1024 * 10, encoding: 'utf8' });
         cargoTestOutput = result;
 
@@ -91,30 +90,77 @@ function generateReport() {
             actualTestResults.push({ name: statusMatch[1], status: statusMatch[2] });
         }
     } catch (e) {
-        cargoTestOutput = (e.stdout || '') + (e.stderr || ''); // Ensure stdout/stderr are strings
-        // Still try to parse results even if cargo test exited with an error (e.g., due to failures)
+        cargoTestOutput = (e.stdout || '') + (e.stderr || '');
         const testStatusPattern = /^test\s+([a-zA-Z_][a-zA-Z0-9_:]*)\s+\.\.\.\s+(ok|FAILED|ignored)/gm;
         let statusMatch;
         while ((statusMatch = testStatusPattern.exec(cargoTestOutput)) !== null) {
             actualTestResults.push({ name: statusMatch[1], status: statusMatch[2] });
         }
     }
-    
-    // Update API status with actual test results
+
+    // Update Status
     for (const api of publicApis) {
         const matchingTest = actualTestResults.find(tr => tr.name.includes(api.rawFnName));
         if (matchingTest) {
             api.status = matchingTest.status === 'ok' ? 'Pass' : 'Fail';
         } else if (api.hasTest) {
-             // If a test was found by name, but not in actualTestResults, it likely means cargo test
-             // didn't run it (e.g., wasm-bindgen issues for non-wasm target).
              api.status = 'Test Written (Not Run/Wasm)';
         }
     }
 
+    // --- GROUP BY MODULE ---
+    const moduleOrder = ['parameters', 'state', 'rasterizer', 'renderer', 'engine', 'step', 'lib', 'utils'];
+    
+    // Create a map of Module -> APIs
+    const groupedApis = {};
+    moduleOrder.forEach(m => groupedApis[m] = []);
+    publicApis.forEach(api => {
+        if (!groupedApis[api.module]) {
+            groupedApis[api.module] = [];
+            if (!moduleOrder.includes(api.module)) {
+                moduleOrder.push(api.module);
+            }
+        }
+        groupedApis[api.module].push(api);
+    });
+
     const totalApis = publicApis.length;
     const apisWithTests = publicApis.filter(api => api.hasTest).length;
     const apisWithoutTests = totalApis - apisWithTests;
+
+    let flexItemsHtml = ''; // Change from tablesHtml to flexItemsHtml
+    for (const mod of moduleOrder) {
+        const apis = groupedApis[mod];
+        if (!apis || apis.length === 0) continue;
+
+        flexItemsHtml += `
+            <div class="module-group">
+                <h2>${mod.charAt(0).toUpperCase() + mod.slice(1)} Module</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>API Name</th>
+                            <th>Test Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
+        apis.forEach(api => {
+            flexItemsHtml += `
+                        <tr>
+                            <td>${api.name}</td>
+                            <td class="status-${api.status.replace(/[\s\(\)\/]/g, '')}">${api.status}</td>
+                        </tr>
+            `;
+        });
+
+        flexItemsHtml += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
 
     const htmlContent = `
 <!DOCTYPE html>
@@ -123,20 +169,57 @@ function generateReport() {
     <meta charset="UTF-8">
     <title>API & Test Coverage Report</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        h1 { margin-bottom: 10px; }
-        .summary { margin-bottom: 20px; font-weight: bold; }
-        .pass { color: green; }
-        .fail { color: red; }
-        .untested { color: orange; }
-        table { border-collapse: collapse; width: 100%; max-width: 1000px; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        .status-Pass { background-color: #dff0d8; color: #3c763d; }
-        .status-Fail { background-color: #f2dede; color: #a94442; }
+        body { font-family: sans-serif; font-size: 11px; padding: 10px; background-color: #f4f4f4; margin: 0; }
+        h1 { font-size: 16px; margin: 10px 0; text-align: center; }
+        h2 { font-size: 13px; margin-top: 5px; margin-bottom: 5px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 3px; }
+        .summary { font-size: 11px; margin-bottom: 10px; font-weight: bold; text-align: center; background: white; padding: 8px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        
+        /* Flexbox Layout */
+        .flex-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between; /* Distributes items with space between them */
+            gap: 10px; /* Space between flex items */
+            margin-bottom: 10px;
+        }
+        
+        .module-group { 
+            background: white; 
+            padding: 8px; 
+            border-radius: 4px; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1); 
+            flex: 1 1 calc(33.333% - 10px); /* Grow, shrink, base width for 3 columns with 10px gap */
+            min-width: 250px; /* Minimum width to prevent items from becoming too narrow */
+            box-sizing: border-box; /* Include padding and border in the element's total width and height */
+        }
+
+        /* Ensure "Discovered Tests" takes full width */
+        .full-width-section {
+            flex-basis: 100%; /* Take full width */
+            margin-top: 10px; /* Add some space above */
+        }
+
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border-bottom: 1px solid #ddd; padding: 3px; text-align: left; }
+        th { background-color: #f8f8f8; color: #555; }
+        tr:last-child td { border-bottom: none; }
+        
+        .status-Pass { background-color: #dff0d8; color: #3c763d; font-weight: bold; }
+        .status-Fail { background-color: #f2dede; color: #a94442; font-weight: bold; }
         .status-NoTest { background-color: #fcf8e3; color: #8a6d3b; }
-        .status-TestWrittenNotRunWasm { background-color: #d9edf7; color: #31708f; } /* Blue for WASM-related not run */
+        .status-TestWrittenNotRunWasm { background-color: #d9edf7; color: #31708f; }
+        
+        ul { columns: 3; -webkit-columns: 3; -moz-columns: 3; font-size: 10px; padding-left: 15px; margin: 0; }
+        li { margin-bottom: 1px; }
+
+        @media (max-width: 900px) {
+            .module-group { flex: 1 1 calc(50% - 10px); } /* 2 columns */
+            ul { columns: 2; -webkit-columns: 2; -moz-columns: 2; }
+        }
+        @media (max-width: 600px) {
+            .module-group { flex: 1 1 100%; } /* 1 column */
+            ul { columns: 1; -webkit-columns: 1; -moz-columns: 1; }
+        }
     </style>
 </head>
 <body>
@@ -146,32 +229,16 @@ function generateReport() {
         Total APIs: ${totalApis} | APIs with Tests: ${apisWithTests} | APIs without Tests: ${apisWithoutTests}
     </div>
 
-    <h2>API Functions & Methods Overview</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>API Name</th>
-                <th>Type</th>
-                <th>Test Status</th>
-            </tr>
-        </thead>
-        <tbody>
-${publicApis.map(api => `
-            <tr>
-                <td>${api.name}</td>
-                <td>${api.type}</td>
-                <td class="status-${api.status.replace(/[\s\(\)\/]/g, '')}">${api.status}</td>
-            </tr>`).join('')}
-        </tbody>
-    </table>
+    <div class="flex-container">
+        ${flexItemsHtml}
+    </div>
 
-    <h2>Discovered Tests</h2>
-    <ul>
+    <div class="module-group full-width-section">
+        <h2>Discovered Tests</h2>
+        <ul>
 ${discoveredTests.map(testName => `<li>${testName}</li>`).join('')}
-    </ul>
-    
-    <h2>Raw Cargo Test Output</h2>
-    <pre>${escapeHtml(cargoTestOutput)}</pre>
+        </ul>
+    </div>
 </body>
 </html>
         `;
@@ -180,7 +247,6 @@ ${discoveredTests.map(testName => `<li>${testName}</li>`).join('')}
     fs.writeFileSync(reportPath, htmlContent);
 
     console.log(`Comprehensive report generated: ${reportPath}`);
-    console.log(`Summary: Total APIs=${totalApis}, APIs with Tests=${apisWithTests}, APIs without Tests=${apisWithoutTests}`);
 }
 
 function escapeHtml(text) {

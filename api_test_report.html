@@ -5,688 +5,331 @@
     <meta charset="UTF-8">
     <title>API & Test Coverage Report</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        h1 { margin-bottom: 10px; }
-        .summary { margin-bottom: 20px; font-weight: bold; }
-        .pass { color: green; }
-        .fail { color: red; }
-        .untested { color: orange; }
-        table { border-collapse: collapse; width: 100%; max-width: 1000px; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        .status-Pass { background-color: #dff0d8; color: #3c763d; }
-        .status-Fail { background-color: #f2dede; color: #a94442; }
+        body { font-family: sans-serif; font-size: 11px; padding: 10px; background-color: #f4f4f4; margin: 0; }
+        h1 { font-size: 16px; margin: 10px 0; text-align: center; }
+        h2 { font-size: 13px; margin-top: 5px; margin-bottom: 5px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 3px; }
+        .summary { font-size: 11px; margin-bottom: 10px; font-weight: bold; text-align: center; background: white; padding: 8px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        
+        /* Flexbox Layout */
+        .flex-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between; /* Distributes items with space between them */
+            gap: 10px; /* Space between flex items */
+            margin-bottom: 10px;
+        }
+        
+        .module-group { 
+            background: white; 
+            padding: 8px; 
+            border-radius: 4px; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1); 
+            flex: 1 1 calc(33.333% - 10px); /* Grow, shrink, base width for 3 columns with 10px gap */
+            min-width: 250px; /* Minimum width to prevent items from becoming too narrow */
+            box-sizing: border-box; /* Include padding and border in the element's total width and height */
+        }
+
+        /* Ensure "Discovered Tests" takes full width */
+        .full-width-section {
+            flex-basis: 100%; /* Take full width */
+            margin-top: 10px; /* Add some space above */
+        }
+
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border-bottom: 1px solid #ddd; padding: 3px; text-align: left; }
+        th { background-color: #f8f8f8; color: #555; }
+        tr:last-child td { border-bottom: none; }
+        
+        .status-Pass { background-color: #dff0d8; color: #3c763d; font-weight: bold; }
+        .status-Fail { background-color: #f2dede; color: #a94442; font-weight: bold; }
         .status-NoTest { background-color: #fcf8e3; color: #8a6d3b; }
-        .status-Unknown { background-color: #d9edf7; color: #31708f; } /* For 'Test Written (Status Unknown)' */
+        .status-TestWrittenNotRunWasm { background-color: #d9edf7; color: #31708f; }
+        
+        ul { columns: 3; -webkit-columns: 3; -moz-columns: 3; font-size: 10px; padding-left: 15px; margin: 0; }
+        li { margin-bottom: 1px; }
+
+        @media (max-width: 900px) {
+            .module-group { flex: 1 1 calc(50% - 10px); } /* 2 columns */
+            ul { columns: 2; -webkit-columns: 2; -moz-columns: 2; }
+        }
+        @media (max-width: 600px) {
+            .module-group { flex: 1 1 100%; } /* 1 column */
+            ul { columns: 1; -webkit-columns: 1; -moz-columns: 1; }
+        }
     </style>
 </head>
 <body>
     <h1>API & Test Coverage Report</h1>
     <div class="summary">
-        Date: 12/11/2025, 9:01:17 PM<br>
-        Total APIs: 27 | APIs with Tests: 1 | APIs without Tests: 26
+        Date: 12/11/2025, 9:11:17 PM<br>
+        Total APIs: 27 | APIs with Tests: 19 | APIs without Tests: 8
     </div>
 
-    <h2>API Functions & Methods Overview</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>API Name</th>
-                <th>Type</th>
-                <th>Test Status</th>
-            </tr>
-        </thead>
-        <tbody>
+    <div class="flex-container">
+        
+            <div class="module-group">
+                <h2>Parameters Module</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>API Name</th>
+                            <th>Test Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                        <tr>
+                            <td>parameters::validate_parameters</td>
+                            <td class="status-Fail">Fail</td>
+                        </tr>
+            
+                    </tbody>
+                </table>
+            </div>
+        
+            <div class="module-group">
+                <h2>State Module</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>API Name</th>
+                            <th>Test Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                        <tr>
+                            <td>state::new</td>
+                            <td class="status-Fail">Fail</td>
+                        </tr>
+            
+                        <tr>
+                            <td>state::reset</td>
+                            <td class="status-NoTest">No Test</td>
+                        </tr>
+            
+                        <tr>
+                            <td>SimulationState::new</td>
+                            <td class="status-Fail">Fail</td>
+                        </tr>
+            
+                    </tbody>
+                </table>
+            </div>
+        
+            <div class="module-group">
+                <h2>Rasterizer Module</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>API Name</th>
+                            <th>Test Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                        <tr>
+                            <td>rasterizer::rasterize_obstacles</td>
+                            <td class="status-NoTest">No Test</td>
+                        </tr>
+            
+                        <tr>
+                            <td>rasterizer::rasterize_path</td>
+                            <td class="status-NoTest">No Test</td>
+                        </tr>
+            
+                        <tr>
+                            <td>rasterizer::parse_svg_path</td>
+                            <td class="status-Fail">Fail</td>
+                        </tr>
+            
+                        <tr>
+                            <td>rasterizer::fill_path_on_grid</td>
+                            <td class="status-Fail">Fail</td>
+                        </tr>
+            
+                    </tbody>
+                </table>
+            </div>
+        
+            <div class="module-group">
+                <h2>Renderer Module</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>API Name</th>
+                            <th>Test Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                        <tr>
+                            <td>renderer::render</td>
+                            <td class="status-Fail">Fail</td>
+                        </tr>
+            
+                        <tr>
+                            <td>renderer::map_value_to_color</td>
+                            <td class="status-Fail">Fail</td>
+                        </tr>
+            
+                    </tbody>
+                </table>
+            </div>
+        
+            <div class="module-group">
+                <h2>Engine Module</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>API Name</th>
+                            <th>Test Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                        <tr>
+                            <td>engine::update_hx</td>
+                            <td class="status-NoTest">No Test</td>
+                        </tr>
+            
+                        <tr>
+                            <td>engine::update_hy</td>
+                            <td class="status-NoTest">No Test</td>
+                        </tr>
+            
+                        <tr>
+                            <td>engine::update_e_fields</td>
+                            <td class="status-NoTest">No Test</td>
+                        </tr>
+            
+                        <tr>
+                            <td>engine::apply_source</td>
+                            <td class="status-Fail">Fail</td>
+                        </tr>
+            
+                        <tr>
+                            <td>engine::apply_boundary_left</td>
+                            <td class="status-Fail">Fail</td>
+                        </tr>
+            
+                        <tr>
+                            <td>engine::apply_boundary_right</td>
+                            <td class="status-Fail">Fail</td>
+                        </tr>
+            
+                        <tr>
+                            <td>engine::apply_boundary_top</td>
+                            <td class="status-Fail">Fail</td>
+                        </tr>
+            
+                        <tr>
+                            <td>engine::apply_boundary_bottom</td>
+                            <td class="status-Fail">Fail</td>
+                        </tr>
+            
+                        <tr>
+                            <td>engine::compute_source_signal</td>
+                            <td class="status-Fail">Fail</td>
+                        </tr>
+            
+                    </tbody>
+                </table>
+            </div>
+        
+            <div class="module-group">
+                <h2>Step Module</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>API Name</th>
+                            <th>Test Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                        <tr>
+                            <td>step::step</td>
+                            <td class="status-Fail">Fail</td>
+                        </tr>
+            
+                    </tbody>
+                </table>
+            </div>
+        
+            <div class="module-group">
+                <h2>Lib Module</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>API Name</th>
+                            <th>Test Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                        <tr>
+                            <td>lib::new</td>
+                            <td class="status-Fail">Fail</td>
+                        </tr>
+            
+                        <tr>
+                            <td>lib::step</td>
+                            <td class="status-Fail">Fail</td>
+                        </tr>
+            
+                        <tr>
+                            <td>lib::get_frame_buffer</td>
+                            <td class="status-Fail">Fail</td>
+                        </tr>
+            
+                        <tr>
+                            <td>lib::get_current_step</td>
+                            <td class="status-Fail">Fail</td>
+                        </tr>
+            
+                        <tr>
+                            <td>FdtdSimulator::new</td>
+                            <td class="status-Fail">Fail</td>
+                        </tr>
+            
+                    </tbody>
+                </table>
+            </div>
+        
+            <div class="module-group">
+                <h2>Utils Module</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>API Name</th>
+                            <th>Test Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                        <tr>
+                            <td>utils::log</td>
+                            <td class="status-NoTest">No Test</td>
+                        </tr>
+            
+                        <tr>
+                            <td>utils::set_panic_hook</td>
+                            <td class="status-NoTest">No Test</td>
+                        </tr>
+            
+                    </tbody>
+                </table>
+            </div>
+        
+    </div>
 
-            <tr>
-                <td>engine::update_hx</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>engine::update_hy</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>engine::update_e_fields</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>engine::apply_source</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>engine::apply_boundary_left</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>engine::apply_boundary_right</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>engine::apply_boundary_top</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>engine::apply_boundary_bottom</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>engine::compute_source_signal</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>lib::new</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>lib::step</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>lib::get_frame_buffer</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>lib::get_current_step</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>FdtdSimulator::new</td>
-                <td>method</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>parameters::validate_parameters</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>rasterizer::rasterize_obstacles</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>rasterizer::rasterize_path</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>rasterizer::parse_svg_path</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>rasterizer::fill_path_on_grid</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>renderer::render</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>renderer::map_value_to_color</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>state::new</td>
-                <td>function</td>
-                <td class="status-Fail">Fail</td>
-            </tr>
-            <tr>
-                <td>state::reset</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>SimulationState::new</td>
-                <td>method</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>step::step</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>utils::log</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-            <tr>
-                <td>utils::set_panic_hook</td>
-                <td>function</td>
-                <td class="status-NoTest">No Test</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <h2>Discovered Tests</h2>
-    <ul>
+    <div class="module-group full-width-section">
+        <h2>Discovered Tests</h2>
+        <ul>
 <li>test_compute_source_signal_zero_time</li><li>test_compute_source_signal_peak</li><li>test_compute_source_signal_zero_crossing</li><li>test_apply_boundary_left_does_not_panic</li><li>test_apply_boundary_right_does_not_panic</li><li>test_apply_boundary_top_does_not_panic</li><li>test_apply_boundary_bottom_does_not_panic</li><li>test_update_fields_no_source_remains_zero</li><li>test_apply_source_injects_value</li><li>test_validate_parameters_valid</li><li>test_validate_parameters_invalid_dimensions</li><li>test_validate_parameters_source_out_of_bounds</li><li>test_validate_parameters_negative_frequency</li><li>test_validate_parameters_zero_duration</li><li>test_parse_svg_path_simple_rect</li><li>test_fill_path_on_grid_square</li><li>test_map_value_to_color_zero</li><li>test_map_value_to_color_positive_max</li><li>test_map_value_to_color_negative_max</li><li>test_render_output_size</li><li>test_fdtd_simulator_new_succeeds_with_valid_config</li><li>test_fdtd_simulator_new_fails_with_invalid_config</li><li>test_fdtd_simulator_get_current_step</li><li>test_fdtd_simulator_step_advances_time</li><li>test_fdtd_simulator_get_frame_buffer_size</li><li>test_state_new_initialization</li><li>test_step_advances_time</li>
-    </ul>
-    
-    <h2>Raw Cargo Test Output</h2>
-    <pre>
-running 0 tests
-
-test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
-
-running 3 tests
-test test_compute_source_signal_zero_crossing ... FAILED
-test test_compute_source_signal_zero_time ... FAILED
-test test_compute_source_signal_peak ... FAILED
-
-failures:
-
----- test_compute_source_signal_zero_crossing stdout ----
-thread &#039;test_compute_source_signal_zero_crossing&#039; panicked at src/engine.rs:47:5:
-not yet implemented: Calculate A * sin(2 * pi * f * t)
-
----- test_compute_source_signal_zero_time stdout ----
-thread &#039;test_compute_source_signal_zero_time&#039; panicked at src/engine.rs:47:5:
-not yet implemented: Calculate A * sin(2 * pi * f * t)
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
----- test_compute_source_signal_peak stdout ----
-thread &#039;test_compute_source_signal_peak&#039; panicked at src/engine.rs:47:5:
-not yet implemented: Calculate A * sin(2 * pi * f * t)
-
-
-failures:
-    test_compute_source_signal_peak
-    test_compute_source_signal_zero_crossing
-    test_compute_source_signal_zero_time
-
-test result: FAILED. 0 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
-
-running 4 tests
-test test_apply_boundary_left_does_not_panic ... FAILED
-test test_apply_boundary_bottom_does_not_panic ... FAILED
-test test_apply_boundary_top_does_not_panic ... FAILED
-test test_apply_boundary_right_does_not_panic ... FAILED
-
-failures:
-
----- test_apply_boundary_left_does_not_panic stdout ----
-thread &#039;test_apply_boundary_left_does_not_panic&#039; panicked at src/state.rs:25:9:
-not yet implemented: Initialize simulation state with zero fields
-
----- test_apply_boundary_bottom_does_not_panic stdout ----
-thread &#039;test_apply_boundary_bottom_does_not_panic&#039; panicked at src/state.rs:25:9:
-not yet implemented: Initialize simulation state with zero fields
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
----- test_apply_boundary_top_does_not_panic stdout ----
-thread &#039;test_apply_boundary_top_does_not_panic&#039; panicked at src/state.rs:25:9:
-not yet implemented: Initialize simulation state with zero fields
-
----- test_apply_boundary_right_does_not_panic stdout ----
-thread &#039;test_apply_boundary_right_does_not_panic&#039; panicked at src/state.rs:25:9:
-not yet implemented: Initialize simulation state with zero fields
-
-
-failures:
-    test_apply_boundary_bottom_does_not_panic
-    test_apply_boundary_left_does_not_panic
-    test_apply_boundary_right_does_not_panic
-    test_apply_boundary_top_does_not_panic
-
-test result: FAILED. 0 passed; 4 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
-
-running 2 tests
-test test_update_fields_no_source_remains_zero ... FAILED
-test test_apply_source_injects_value ... FAILED
-
-failures:
-
----- test_update_fields_no_source_remains_zero stdout ----
-thread &#039;test_update_fields_no_source_remains_zero&#039; panicked at src/state.rs:25:9:
-not yet implemented: Initialize simulation state with zero fields
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
----- test_apply_source_injects_value stdout ----
-thread &#039;test_apply_source_injects_value&#039; panicked at src/state.rs:25:9:
-not yet implemented: Initialize simulation state with zero fields
-
-
-failures:
-    test_apply_source_injects_value
-    test_update_fields_no_source_remains_zero
-
-test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
-
-running 5 tests
-test test_validate_parameters_invalid_dimensions ... FAILED
-test test_validate_parameters_source_out_of_bounds ... FAILED
-test test_validate_parameters_negative_frequency ... FAILED
-test test_validate_parameters_zero_duration ... FAILED
-test test_validate_parameters_valid ... FAILED
-
-failures:
-
----- test_validate_parameters_invalid_dimensions stdout ----
-thread &#039;test_validate_parameters_invalid_dimensions&#039; panicked at src/parameters.rs:23:5:
-not yet implemented: Implement parameter validation
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
----- test_validate_parameters_source_out_of_bounds stdout ----
-thread &#039;test_validate_parameters_source_out_of_bounds&#039; panicked at src/parameters.rs:23:5:
-not yet implemented: Implement parameter validation
-
----- test_validate_parameters_negative_frequency stdout ----
-thread &#039;test_validate_parameters_negative_frequency&#039; panicked at src/parameters.rs:23:5:
-not yet implemented: Implement parameter validation
-
----- test_validate_parameters_zero_duration stdout ----
-thread &#039;test_validate_parameters_zero_duration&#039; panicked at src/parameters.rs:23:5:
-not yet implemented: Implement parameter validation
-
----- test_validate_parameters_valid stdout ----
-thread &#039;test_validate_parameters_valid&#039; panicked at src/parameters.rs:23:5:
-not yet implemented: Implement parameter validation
-
-
-failures:
-    test_validate_parameters_invalid_dimensions
-    test_validate_parameters_negative_frequency
-    test_validate_parameters_source_out_of_bounds
-    test_validate_parameters_valid
-    test_validate_parameters_zero_duration
-
-test result: FAILED. 0 passed; 5 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
-
-running 2 tests
-test test_parse_svg_path_simple_rect ... FAILED
-test test_fill_path_on_grid_square ... FAILED
-
-failures:
-
----- test_parse_svg_path_simple_rect stdout ----
-thread &#039;test_parse_svg_path_simple_rect&#039; panicked at src/rasterizer.rs:24:5:
-not yet implemented: Implement SVG path parser
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
----- test_fill_path_on_grid_square stdout ----
-thread &#039;test_fill_path_on_grid_square&#039; panicked at src/rasterizer.rs:30:5:
-not yet implemented: Implement rasterization algorithm (e.g. scanline fill)
-
-
-failures:
-    test_fill_path_on_grid_square
-    test_parse_svg_path_simple_rect
-
-test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
-
-running 4 tests
-test test_render_output_size ... FAILED
-test test_map_value_to_color_zero ... FAILED
-test test_map_value_to_color_negative_max ... FAILED
-test test_map_value_to_color_positive_max ... FAILED
-
-failures:
-
----- test_render_output_size stdout ----
-thread &#039;test_render_output_size&#039; panicked at src/state.rs:25:9:
-not yet implemented: Initialize simulation state with zero fields
-
----- test_map_value_to_color_zero stdout ----
-thread &#039;test_map_value_to_color_zero&#039; panicked at src/renderer.rs:16:5:
-not yet implemented: Implement color mapping logic (Gradient/LUT)
-
----- test_map_value_to_color_negative_max stdout ----
-thread &#039;test_map_value_to_color_negative_max&#039; panicked at src/renderer.rs:16:5:
-not yet implemented: Implement color mapping logic (Gradient/LUT)
-
----- test_map_value_to_color_positive_max stdout ----
-thread &#039;test_map_value_to_color_positive_max&#039; panicked at src/renderer.rs:16:5:
-not yet implemented: Implement color mapping logic (Gradient/LUT)
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
-
-failures:
-    test_map_value_to_color_negative_max
-    test_map_value_to_color_positive_max
-    test_map_value_to_color_zero
-    test_render_output_size
-
-test result: FAILED. 0 passed; 4 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
-
-running 5 tests
-test test_fdtd_simulator_new_fails_with_invalid_config ... FAILED
-test test_fdtd_simulator_step_advances_time ... FAILED
-test test_fdtd_simulator_get_current_step ... FAILED
-test test_fdtd_simulator_new_succeeds_with_valid_config ... FAILED
-test test_fdtd_simulator_get_frame_buffer_size ... FAILED
-
-failures:
-
----- test_fdtd_simulator_new_fails_with_invalid_config stdout ----
-thread &#039;test_fdtd_simulator_new_fails_with_invalid_config&#039; panicked at /Users/miguelarmengol/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-0.2.106/src/lib.rs:1255:1:
-function not implemented on non-wasm32 targets
-
----- test_fdtd_simulator_step_advances_time stdout ----
-thread &#039;test_fdtd_simulator_step_advances_time&#039; panicked at /Users/miguelarmengol/.cargo/registry/src/index.crates.io-6f17d22bba15001f/js-sys-0.3.83/src/lib.rs:3646:1:
-cannot call wasm-bindgen imported functions on non-wasm targets
-
----- test_fdtd_simulator_get_current_step stdout ----
-thread &#039;test_fdtd_simulator_get_current_step&#039; panicked at /Users/miguelarmengol/.cargo/registry/src/index.crates.io-6f17d22bba15001f/js-sys-0.3.83/src/lib.rs:3646:1:
-cannot call wasm-bindgen imported functions on non-wasm targets
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
----- test_fdtd_simulator_new_succeeds_with_valid_config stdout ----
-thread &#039;test_fdtd_simulator_new_succeeds_with_valid_config&#039; panicked at /Users/miguelarmengol/.cargo/registry/src/index.crates.io-6f17d22bba15001f/js-sys-0.3.83/src/lib.rs:3646:1:
-cannot call wasm-bindgen imported functions on non-wasm targets
-
----- test_fdtd_simulator_get_frame_buffer_size stdout ----
-thread &#039;test_fdtd_simulator_get_frame_buffer_size&#039; panicked at /Users/miguelarmengol/.cargo/registry/src/index.crates.io-6f17d22bba15001f/js-sys-0.3.83/src/lib.rs:3646:1:
-cannot call wasm-bindgen imported functions on non-wasm targets
-
-
-failures:
-    test_fdtd_simulator_get_current_step
-    test_fdtd_simulator_get_frame_buffer_size
-    test_fdtd_simulator_new_fails_with_invalid_config
-    test_fdtd_simulator_new_succeeds_with_valid_config
-    test_fdtd_simulator_step_advances_time
-
-test result: FAILED. 0 passed; 5 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
-
-running 1 test
-test test_state_new_initialization ... FAILED
-
-failures:
-
----- test_state_new_initialization stdout ----
-thread &#039;test_state_new_initialization&#039; panicked at src/state.rs:25:9:
-not yet implemented: Initialize simulation state with zero fields
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
-
-failures:
-    test_state_new_initialization
-
-test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
-
-running 1 test
-test test_step_advances_time ... FAILED
-
-failures:
-
----- test_step_advances_time stdout ----
-thread &#039;test_step_advances_time&#039; panicked at src/state.rs:25:9:
-not yet implemented: Initialize simulation state with zero fields
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
-
-failures:
-    test_step_advances_time
-
-test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
-
-running 0 tests
-
-test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
-warning: unused import: `crate::parameters::SimulationParameters`
- --&gt; src/state.rs:1:5
-  |
-1 | use crate::parameters::SimulationParameters;
-  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  |
-  = note: `#[warn(unused_imports)]` on by default
-
-warning: unused variable: `params`
-  --&gt; src/parameters.rs:22:28
-   |
-22 | pub fn validate_parameters(params: &amp;SimulationParameters) -&gt; Result&lt;(), String&gt; {
-   |                            ^^^^^^ help: if this is intentional, prefix it with an underscore: `_params`
-   |
-   = note: `#[warn(unused_variables)]` on by default
-
-warning: unused variable: `width`
-  --&gt; src/state.rs:24:16
-   |
-24 |     pub fn new(width: usize, height: usize) -&gt; Self {
-   |                ^^^^^ help: if this is intentional, prefix it with an underscore: `_width`
-
-warning: unused variable: `height`
-  --&gt; src/state.rs:24:30
-   |
-24 |     pub fn new(width: usize, height: usize) -&gt; Self {
-   |                              ^^^^^^ help: if this is intentional, prefix it with an underscore: `_height`
-
-warning: unused variable: `state`
- --&gt; src/engine.rs:5:18
-  |
-5 | pub fn update_hx(state: &amp;mut SimulationState) {
-  |                  ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
-
-warning: unused variable: `state`
-  --&gt; src/engine.rs:10:18
-   |
-10 | pub fn update_hy(state: &amp;mut SimulationState) {
-   |                  ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
-
-warning: unused variable: `state`
-  --&gt; src/engine.rs:16:24
-   |
-16 | pub fn update_e_fields(state: &amp;mut SimulationState) {
-   |                        ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
-
-warning: unused variable: `state`
-  --&gt; src/engine.rs:21:21
-   |
-21 | pub fn apply_source(state: &amp;mut SimulationState, source: &amp;SourceDefinition) {
-   |                     ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
-
-warning: unused variable: `source`
-  --&gt; src/engine.rs:21:50
-   |
-21 | pub fn apply_source(state: &amp;mut SimulationState, source: &amp;SourceDefinition) {
-   |                                                  ^^^^^^ help: if this is intentional, prefix it with an underscore: `_source`
-
-warning: unused variable: `state`
-  --&gt; src/engine.rs:26:28
-   |
-26 | pub fn apply_boundary_left(state: &amp;mut SimulationState) {
-   |                            ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
-
-warning: unused variable: `state`
-  --&gt; src/engine.rs:31:29
-   |
-31 | pub fn apply_boundary_right(state: &amp;mut SimulationState) {
-   |                             ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
-
-warning: unused variable: `state`
-  --&gt; src/engine.rs:36:27
-   |
-36 | pub fn apply_boundary_top(state: &amp;mut SimulationState) {
-   |                           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
-
-warning: unused variable: `state`
-  --&gt; src/engine.rs:41:30
-   |
-41 | pub fn apply_boundary_bottom(state: &amp;mut SimulationState) {
-   |                              ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
-
-warning: unused variable: `t`
-  --&gt; src/engine.rs:46:30
-   |
-46 | pub fn compute_source_signal(t: f64, frequency: f64, amplitude: f64) -&gt; f64 {
-   |                              ^ help: if this is intentional, prefix it with an underscore: `_t`
-
-warning: unused variable: `frequency`
-  --&gt; src/engine.rs:46:38
-   |
-46 | pub fn compute_source_signal(t: f64, frequency: f64, amplitude: f64) -&gt; f64 {
-   |                                      ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_frequency`
-
-warning: unused variable: `amplitude`
-  --&gt; src/engine.rs:46:54
-   |
-46 | pub fn compute_source_signal(t: f64, frequency: f64, amplitude: f64) -&gt; f64 {
-   |                                                      ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_amplitude`
-
-warning: unused variable: `width`
-  --&gt; src/rasterizer.rs:12:28
-   |
-12 | pub fn rasterize_obstacles(width: usize, height: usize, svg_paths: &amp;[String]) -&gt; Vec&lt;f64&gt; {
-   |                            ^^^^^ help: if this is intentional, prefix it with an underscore: `_width`
-
-warning: unused variable: `height`
-  --&gt; src/rasterizer.rs:12:42
-   |
-12 | pub fn rasterize_obstacles(width: usize, height: usize, svg_paths: &amp;[String]) -&gt; Vec&lt;f64&gt; {
-   |                                          ^^^^^^ help: if this is intentional, prefix it with an underscore: `_height`
-
-warning: unused variable: `svg_paths`
-  --&gt; src/rasterizer.rs:12:57
-   |
-12 | pub fn rasterize_obstacles(width: usize, height: usize, svg_paths: &amp;[String]) -&gt; Vec&lt;f64&gt; {
-   |                                                         ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_svg_paths`
-
-warning: unused variable: `width`
-  --&gt; src/rasterizer.rs:17:23
-   |
-17 | pub fn rasterize_path(width: usize, height: usize, path: &amp;str, grid: &amp;mut [f64]) {
-   |                       ^^^^^ help: if this is intentional, prefix it with an underscore: `_width`
-
-warning: unused variable: `height`
-  --&gt; src/rasterizer.rs:17:37
-   |
-17 | pub fn rasterize_path(width: usize, height: usize, path: &amp;str, grid: &amp;mut [f64]) {
-   |                                     ^^^^^^ help: if this is intentional, prefix it with an underscore: `_height`
-
-warning: unused variable: `path`
-  --&gt; src/rasterizer.rs:17:52
-   |
-17 | pub fn rasterize_path(width: usize, height: usize, path: &amp;str, grid: &amp;mut [f64]) {
-   |                                                    ^^^^ help: if this is intentional, prefix it with an underscore: `_path`
-
-warning: unused variable: `grid`
-  --&gt; src/rasterizer.rs:17:64
-   |
-17 | pub fn rasterize_path(width: usize, height: usize, path: &amp;str, grid: &amp;mut [f64]) {
-   |                                                                ^^^^ help: if this is intentional, prefix it with an underscore: `_grid`
-
-warning: unused variable: `path_str`
-  --&gt; src/rasterizer.rs:23:23
-   |
-23 | pub fn parse_svg_path(path_str: &amp;str) -&gt; Result&lt;Vec&lt;PathCommand&gt;, String&gt; {
-   |                       ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_path_str`
-
-warning: unused variable: `width`
-  --&gt; src/rasterizer.rs:29:26
-   |
-29 | pub fn fill_path_on_grid(width: usize, height: usize, commands: &amp;[PathCommand], grid: &amp;mut [f64]) {
-   |                          ^^^^^ help: if this is intentional, prefix it with an underscore: `_width`
-
-warning: unused variable: `height`
-  --&gt; src/rasterizer.rs:29:40
-   |
-29 | pub fn fill_path_on_grid(width: usize, height: usize, commands: &amp;[PathCommand], grid: &amp;mut [f64]) {
-   |                                        ^^^^^^ help: if this is intentional, prefix it with an underscore: `_height`
-
-warning: unused variable: `commands`
-  --&gt; src/rasterizer.rs:29:55
-   |
-29 | pub fn fill_path_on_grid(width: usize, height: usize, commands: &amp;[PathCommand], grid: &amp;mut [f64]) {
-   |                                                       ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_commands`
-
-warning: unused variable: `grid`
-  --&gt; src/rasterizer.rs:29:81
-   |
-29 | pub fn fill_path_on_grid(width: usize, height: usize, commands: &amp;[PathCommand], grid: &amp;mut [f64]) {
-   |                                                                                 ^^^^ help: if this is intentional, prefix it with an underscore: `_grid`
-
-warning: unused variable: `state`
- --&gt; src/renderer.rs:4:15
-  |
-4 | pub fn render(state: &amp;SimulationState) -&gt; Vec&lt;u8&gt; {
-  |               ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
-
-warning: unused variable: `value`
-  --&gt; src/renderer.rs:15:27
-   |
-15 | pub fn map_value_to_color(value: f64) -&gt; [u8; 4] {
-   |                           ^^^^^ help: if this is intentional, prefix it with an underscore: `_value`
-
-warning: unused variable: `config_json`
-  --&gt; src/lib.rs:23:16
-   |
-23 |     pub fn new(config_json: JsValue) -&gt; Result&lt;FdtdSimulator, JsValue&gt; {
-   |                ^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_config_json`
-
-warning: `fdtd_wasm` (lib) generated 31 warnings (run `cargo fix --lib -p fdtd_wasm` to apply 31 suggestions)
-warning: `fdtd_wasm` (lib test) generated 31 warnings (31 duplicates)
-warning: unused import: `std::f64::consts::PI`
- --&gt; tests/test_engine_basics.rs:2:5
-  |
-2 | use std::f64::consts::PI;
-  |     ^^^^^^^^^^^^^^^^^^^^
-  |
-  = note: `#[warn(unused_imports)]` on by default
-
-warning: `fdtd_wasm` (test &quot;test_engine_basics&quot;) generated 1 warning (run `cargo fix --test &quot;test_engine_basics&quot;` to apply 1 suggestion)
-    Finished test [unoptimized + debuginfo] target(s) in 0.05s
-     Running unittests src/lib.rs (target/debug/deps/fdtd_wasm-9056a293140c4c63)
-     Running tests/test_engine_basics.rs (target/debug/deps/test_engine_basics-989cd1d9b274a08d)
-error: test failed, to rerun pass `--test test_engine_basics`
-     Running tests/test_engine_boundaries.rs (target/debug/deps/test_engine_boundaries-057b0919635fe452)
-error: test failed, to rerun pass `--test test_engine_boundaries`
-     Running tests/test_engine_update.rs (target/debug/deps/test_engine_update-31437f3dfdc7a254)
-error: test failed, to rerun pass `--test test_engine_update`
-     Running tests/test_parameters.rs (target/debug/deps/test_parameters-80c8b73785ad0880)
-error: test failed, to rerun pass `--test test_parameters`
-     Running tests/test_rasterizer.rs (target/debug/deps/test_rasterizer-79b71bd5dc042d6f)
-error: test failed, to rerun pass `--test test_rasterizer`
-     Running tests/test_renderer.rs (target/debug/deps/test_renderer-e198cf31bd95d5b3)
-error: test failed, to rerun pass `--test test_renderer`
-     Running tests/test_simulator_api.rs (target/debug/deps/test_simulator_api-e6996ccc42ac13de)
-error: test failed, to rerun pass `--test test_simulator_api`
-     Running tests/test_state.rs (target/debug/deps/test_state-df28fd5c9d401901)
-error: test failed, to rerun pass `--test test_state`
-     Running tests/test_step.rs (target/debug/deps/test_step-3d966fd2cb8faa02)
-error: test failed, to rerun pass `--test test_step`
-   Doc-tests fdtd_wasm
-error: 9 targets failed:
-    `--test test_engine_basics`
-    `--test test_engine_boundaries`
-    `--test test_engine_update`
-    `--test test_parameters`
-    `--test test_rasterizer`
-    `--test test_renderer`
-    `--test test_simulator_api`
-    `--test test_state`
-    `--test test_step`
-</pre>
+        </ul>
+    </div>
 </body>
 </html>
         
