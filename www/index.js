@@ -4,7 +4,7 @@ import init, { FdtdSimulator } from '../pkg/fdtd_wasm.js';
 let simulator = null;
 let animationId = null;
 let isRunning = false;
-let currentScenarioConfig = null; 
+let currentScenarioConfig = null;
 let signalHistory = new Array(100).fill(0); // 100px wide
 
 const WIDTH = 1000;
@@ -24,6 +24,7 @@ const scenarioSelect = document.getElementById('scenarioSelect');
 const statsDiv = document.getElementById('stats');
 const gainSlider = document.getElementById('gainSlider');
 const gainValueLabel = document.getElementById('gainValue');
+const modulationSelect = document.getElementById('modulationSelect');
 const msgInput = document.getElementById('msgInput');
 const sendBtn = document.getElementById('sendBtn');
 const txBitsSpan = document.getElementById('txBits');
@@ -39,12 +40,12 @@ canvas.height = HEIGHT;
 function createParabolaPath(vertexX, vertexY, focalLength, height, openingRight = true) {
     const a = 1.0 / (4.0 * focalLength);
     const direction = openingRight ? 1.0 : -1.0;
-    
+
     let path = "";
     const segments = 80;
     const startY = vertexY - height / 2;
     const endY = vertexY + height / 2;
-    
+
     const thickness = 2;
 
     for (let i = 0; i <= segments; i++) {
@@ -59,7 +60,7 @@ function createParabolaPath(vertexX, vertexY, focalLength, height, openingRight 
         const x = vertexX + direction * (a * Math.pow(y - vertexY, 2) + thickness);
         path += `L ${x} ${y} `;
     }
-    
+
     path += "Z";
     return path;
 }
@@ -71,14 +72,14 @@ function getScenarioConfig(type) {
         const smallVertexX = 100;
         const smallFocalLen = 10;
         const smallFocusX = smallVertexX + smallFocalLen;
-        
+
         const largeVertexX = 800;
-        const largeFocalLen = 60; 
+        const largeFocalLen = 60;
         const largeFocusX = largeVertexX - largeFocalLen;
-        
+
         return {
             source: {
-                x: smallFocusX, 
+                x: smallFocusX,
                 y: HEIGHT / 2,
                 amplitude: 50.0,
                 frequency: freq,
@@ -89,8 +90,8 @@ function getScenarioConfig(type) {
                 y: HEIGHT / 2
             },
             obstacles: [
-                createParabolaPath(smallVertexX, HEIGHT/2, smallFocalLen, 120, true),
-                createParabolaPath(largeVertexX, HEIGHT/2, largeFocalLen, 400, false)
+                createParabolaPath(smallVertexX, HEIGHT / 2, smallFocalLen, 120, true),
+                createParabolaPath(largeVertexX, HEIGHT / 2, largeFocalLen, 400, false)
             ]
         };
     } else if (type === 'free_space') {
@@ -122,7 +123,7 @@ function getScenarioConfig(type) {
                 y: HEIGHT / 2
             },
             obstacles: [
-                `M ${WIDTH/2 - 25} ${HEIGHT/2 - 25} L ${WIDTH/2 + 25} ${HEIGHT/2 - 25} L ${WIDTH/2 + 25} ${HEIGHT/2 + 25} L ${WIDTH/2 - 25} ${HEIGHT/2 + 25} Z`
+                `M ${WIDTH / 2 - 25} ${HEIGHT / 2 - 25} L ${WIDTH / 2 + 25} ${HEIGHT / 2 - 25} L ${WIDTH / 2 + 25} ${HEIGHT / 2 + 25} L ${WIDTH / 2 - 25} ${HEIGHT / 2 + 25} Z`
             ]
         };
     }
@@ -150,7 +151,7 @@ function updateCommsUI() {
 function computeDFT(signal) {
     const N = signal.length;
     const spectrum = new Array(N / 2).fill(0);
-    
+
     for (let k = 0; k < N / 2; k++) {
         let re = 0;
         let im = 0;
@@ -169,24 +170,24 @@ function drawFFT() {
     if (!fftCtx) return;
     fftCtx.fillStyle = '#000';
     fftCtx.fillRect(0, 0, 100, 100);
-    
+
     const spectrum = computeDFT(signalHistory);
     // Find max for scaling
     let maxMag = 0;
     for (let i = 0; i < spectrum.length; i++) {
         if (spectrum[i] > maxMag) maxMag = spectrum[i];
     }
-    
+
     fftCtx.fillStyle = '#0ff'; // Cyan bars
-    
+
     const barWidth = 100 / spectrum.length;
-    
+
     for (let i = 0; i < spectrum.length; i++) {
         let height = 0;
         if (maxMag > 0.001) {
             height = (spectrum[i] / maxMag) * 90; // leave 10px headroom
         }
-        
+
         const x = i * barWidth;
         const y = 100 - height;
         fftCtx.fillRect(x, y, barWidth - 1, height);
@@ -196,14 +197,14 @@ function drawFFT() {
 function drawSignal() {
     signalCtx.fillStyle = '#000';
     signalCtx.fillRect(0, 0, 100, 100);
-    
+
     signalCtx.beginPath();
     signalCtx.strokeStyle = '#0f0';
     signalCtx.lineWidth = 1;
-    
+
     const zoom = parseFloat(gainSlider.value);
     const midY = 50;
-    
+
     for (let i = 0; i < 100; i++) {
         const val = signalHistory[i];
         const y = midY - val * zoom;
@@ -216,7 +217,7 @@ function drawSignal() {
 function draw() {
     if (!simulator) return;
 
-    const bufferPtr = simulator.get_frame_buffer(); 
+    const bufferPtr = simulator.get_frame_buffer();
     const imageData = new ImageData(new Uint8ClampedArray(bufferPtr), WIDTH, HEIGHT);
     ctx.putImageData(imageData, 0, 0);
 
@@ -252,11 +253,12 @@ function updateStats() {
 function resetSimulation() {
     stopSimulation();
     signalHistory.fill(0);
-    
+
     try {
         const config = getConfig();
         simulator = new FdtdSimulator(config);
-        draw(); 
+        simulator.set_comms_scheme(modulationSelect.value === 'ASK');
+        draw();
         updateStats();
     } catch (e) {
         console.error("Failed to create simulator:", e);
@@ -292,7 +294,7 @@ function renderLoop() {
 
     for (let i = 0; i < 5; i++) {
         simulator.step();
-        
+
         if (currentScenarioConfig && currentScenarioConfig.receiver) {
             const val = simulator.get_field_at(currentScenarioConfig.receiver.x, currentScenarioConfig.receiver.y);
             signalHistory.push(val);
@@ -321,7 +323,13 @@ async function run() {
     resetBtn.addEventListener('click', resetSimulation);
     signalSelect.addEventListener('change', resetSimulation);
     scenarioSelect.addEventListener('change', resetSimulation);
-    
+
+    modulationSelect.addEventListener('change', () => {
+        if (simulator) {
+            simulator.set_comms_scheme(modulationSelect.value === 'ASK');
+        }
+    });
+
     gainSlider.addEventListener('input', (e) => {
         gainValueLabel.textContent = `${e.target.value}x`;
     });
@@ -335,7 +343,7 @@ async function run() {
             console.log("Bits:", bits);
             txBitsSpan.textContent = bits;
             msgInput.value = '';
-            
+
             if (!isRunning) {
                 console.log("Starting simulation...");
                 startSimulation();

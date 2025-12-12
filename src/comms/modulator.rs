@@ -99,4 +99,8 @@ impl Modulator {
 
         Some((freq, amp))
     }
+
+    pub fn get_bits_string(&self) -> String {
+        self.bits.iter().map(|b| b.to_string()).collect()
+    }
 }

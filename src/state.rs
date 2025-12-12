@@ -1,4 +1,4 @@
-use crate::parameters::SimulationParameters;
+
 
 /// Represents the state of the simulation at a specific time step.
 /// Typically holds Ez (Electric field) and Hx, Hy (Magnetic fields).

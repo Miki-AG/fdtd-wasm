@@ -69,6 +69,14 @@ pub fn apply_source(state: &mut SimulationState, source: &SourceDefinition) {
     }
 }
 
+/// Applies a specific/forced source value to the grid.
+pub fn apply_forced_source(state: &mut SimulationState, x: usize, y: usize, value: f64) {
+    let idx = y * state.width + x;
+    if idx < state.ez.len() {
+        state.ez[idx] += value;
+    }
+}
+
 // ... boundaries unchanged ... (leaving this comment here is fine as I am replacing the blocks above/below boundaries if I match correctly, but I will match the exact blocks)
 
 /// Applies Absorbing Boundary Conditions (ABC) to the Left boundary.

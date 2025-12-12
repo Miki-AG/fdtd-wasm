@@ -1,13 +1,13 @@
 use crate::parameters::SimulationParameters;
 use crate::state::SimulationState;
 use crate::engine::{
-    update_hx, update_hy, update_e_fields, apply_source,
+    update_hx, update_hy, update_e_fields, apply_source, apply_forced_source,
     apply_boundary_left, apply_boundary_right, apply_boundary_top, apply_boundary_bottom
 };
 
 /// Executes a single simulation step.
 /// This orchestrates the field updates, source injection, and boundary conditions.
-pub fn step(params: &SimulationParameters, state: &mut SimulationState) {
+pub fn step(params: &SimulationParameters, state: &mut SimulationState, forced_source: Option<f64>) {
     // 1. Update Magnetic Fields (Hx, Hy)
     update_hx(state);
     update_hy(state);
@@ -16,7 +16,11 @@ pub fn step(params: &SimulationParameters, state: &mut SimulationState) {
     update_e_fields(state);
 
     // 3. Apply Source
-    apply_source(state, &params.source);
+    if let Some(val) = forced_source {
+        apply_forced_source(state, params.source.x, params.source.y, val);
+    } else {
+        apply_source(state, &params.source);
+    }
 
     // 4. Apply Boundary Conditions
     apply_boundary_left(state);

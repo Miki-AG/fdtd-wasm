@@ -19,26 +19,59 @@ pub struct FdtdSimulator {
     state: SimulationState,
     modulator: Modulator,
     demodulator: Demodulator,
+    is_transmitting: bool,
 }
 
 #[wasm_bindgen]
 impl FdtdSimulator {
-    // ... new ...
+    #[wasm_bindgen(constructor)]
+    pub fn new(val: JsValue) -> Result<FdtdSimulator, JsValue> {
+        utils::set_panic_hook();
+        let params: SimulationParameters = serde_wasm_bindgen::from_value(val)?;
+        let width = params.width;
+        let height = params.height;
+        let freq = params.source.frequency;
+        
+        // FSK Parameters
+        let samples_per_symbol = 200; 
+        let freq_1 = freq;
+        let freq_0 = freq * 0.5; 
+
+        Ok(FdtdSimulator {
+            params,
+            state: SimulationState::new(width, height),
+            modulator: Modulator::new(freq_0, freq_1, samples_per_symbol),
+            demodulator: Demodulator::new(freq_0, freq_1, samples_per_symbol),
+            is_transmitting: false,
+        })
+    }
 
     /// Advances the simulation by one step.
     pub fn step(&mut self) {
-        // 1. Modulator Override
-        if let Some((freq, amp)) = self.modulator.next_modulation() {
-            self.params.source.frequency = freq;
-            self.params.source.amplitude = amp * 50.0; // Scale by base amplitude? 
-            // Or assume base amplitude is 50.0? 
-            // Better: use the amplitude from JS config as "Max Amplitude".
-            // But I don't store "Max Amplitude". I store "Current Amplitude" in params.source.
-            // Hack: Assume 50.0 is the "ON" level.
+        let mut forced_source = None;
+
+        // 1. Modulator Override if transmitting
+        if self.is_transmitting {
+            if let Some((freq, amp_factor)) = self.modulator.next_modulation() {
+                 // Use a fixed max amplitude of 50.0 for now, or derive from existing params if we want to be fancy.
+                 // The modulator returns amp_factor (0.0 or 1.0) for ASK, or 1.0 for FSK.
+                 let max_amplitude = 50.0; 
+                 let amplitude = amp_factor * max_amplitude;
+                 
+                 // We need to compute the instantaneous value of the signal (Sine wave)
+                 // SignalType::ContinuousSine is hardcoded here for data transmission.
+                 let t = self.state.time_step as f64;
+                 let val = engine::compute_source_signal(t, freq, amplitude, &parameters::SignalType::ContinuousSine);
+                 
+                 forced_source = Some(val);
+            } else {
+                // Transmission done
+                self.is_transmitting = false;
+            }
         }
         
         // 2. Run Physics
-        step::step(&self.params, &mut self.state);
+        step::step(&self.params, &mut self.state, forced_source);
     }
 
     pub fn set_comms_scheme(&mut self, is_ask: bool) {
@@ -49,6 +82,7 @@ impl FdtdSimulator {
 
     pub fn send_message(&mut self, text: &str) {
         self.modulator.load_text(text);
+        self.is_transmitting = true;
     }
 
     pub fn get_transmission_bits(&self) -> String {

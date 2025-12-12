@@ -1,4 +1,4 @@
-use crate::comms::packet::{PacketDecoder, PacketState};
+use crate::comms::packet::PacketDecoder;
 use crate::comms::modulator::ModulationScheme;
 
 pub struct Demodulator {
