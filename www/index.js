@@ -26,6 +26,7 @@ const gainSlider = document.getElementById('gainSlider');
 const gainValueLabel = document.getElementById('gainValue');
 const modulationSelect = document.getElementById('modulationSelect');
 const rateSlider = document.getElementById('rateSlider');
+const noiseSlider = document.getElementById('noiseSlider');
 const msgInput = document.getElementById('msgInput');
 const sendBtn = document.getElementById('sendBtn');
 const txBitsSpan = document.getElementById('txBits');
@@ -306,7 +307,17 @@ function renderLoop() {
         simulator.step();
 
         if (currentScenarioConfig && currentScenarioConfig.receiver) {
-            const val = simulator.get_field_at(currentScenarioConfig.receiver.x, currentScenarioConfig.receiver.y);
+            let val = simulator.get_field_at(currentScenarioConfig.receiver.x, currentScenarioConfig.receiver.y);
+
+            // Inject Noise
+            if (noiseSlider) {
+                const noiseLevel = parseFloat(noiseSlider.value);
+                if (noiseLevel > 0) {
+                    // Random noise between -noiseLevel and +noiseLevel
+                    val += (Math.random() - 0.5) * 2 * noiseLevel;
+                }
+            }
+
             signalHistory.push(val);
             signalHistory.shift();
             simulator.process_receiver_signal(val);
