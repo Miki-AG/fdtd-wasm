@@ -13,6 +13,8 @@ const resetBtn = document.getElementById('resetBtn');
 const signalSelect = document.getElementById('signalType');
 const scenarioSelect = document.getElementById('scenarioSelect');
 const statsDiv = document.getElementById('stats');
+const gainSlider = document.getElementById('gainSlider');
+const gainValueLabel = document.getElementById('gainValue');
 
 const WIDTH = 1000;
 const HEIGHT = 600;
@@ -56,7 +58,7 @@ function createParabolaPath(vertexX, vertexY, focalLength, height, openingRight 
     return path;
 }
 
-// ... getScenarioConfig ... (unchanged, just hiding to keep edit short if tool allows, but "replace" needs context. I will keep it all to be safe)
+// ... getScenarioConfig ... (unchanged)
 
 function getScenarioConfig(type) {
     const freq = 0.05;
@@ -145,6 +147,10 @@ async function run() {
     resetBtn.addEventListener('click', resetSimulation);
     signalSelect.addEventListener('change', resetSimulation);
     scenarioSelect.addEventListener('change', resetSimulation);
+    
+    gainSlider.addEventListener('input', (e) => {
+        gainValueLabel.textContent = `${e.target.value}x`;
+    });
 }
 
 function resetSimulation() {
@@ -214,10 +220,7 @@ function drawSignal() {
     signalCtx.strokeStyle = '#0f0'; // Green scope trace
     signalCtx.lineWidth = 1;
     
-    // Auto-scale or fixed? Fixed range [-10, 10] or relative to source?
-    // Source amp is 50. Received will be much smaller.
-    // Let's use a fixed zoom or simple scaling.
-    const zoom = 5.0; // Zoom factor
+    const zoom = parseFloat(gainSlider.value); // Use slider value
     const midY = 50;
     
     for (let i = 0; i < 100; i++) {

@@ -37,6 +37,10 @@
     <div id="signalContainer">
         <div id="signalLabel">Received Signal</div>
         <canvas id="signalCanvas" width="100" height="100"></canvas>
+        <div style="margin-top: 5px; width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <label for="gainSlider" style="font-size: 10px;">Gain: <span id="gainValue">5x</span></label>
+            <input type="range" id="gainSlider" min="1" max="100" value="5" style="width: 90%;">
+        </div>
     </div>
 
     <div id="controls">
@@ -45,18 +49,19 @@
         <select id="signalType">
             <option value="ContinuousSine">Continuous Sine</option>
             <option value="ContinuousSquare">Continuous Square</option>
-            <option value="PulseSine">Pulse Sine</option>
+            <option value="PulseSine" selected>Pulse Sine</option>
             <option value="PulseSquare">Pulse Square</option>
         </select>
         <select id="scenarioSelect">
             <option value="box">Simple Box</option>
-            <option value="free_space">Free Space (No Obstacle)</option>
+            <option value="free_space" selected>Free Space (No Obstacle)</option>
             <option value="double_parabola">Double Parabolic Antenna</option>
         </select>
         <div id="stats">Step: 0</div>
     </div>
 
-  <script type="module" src="./index.js"></script>
-</body>
+      <script type="module" src="./index.js?v=2"></script>
 
-</html>
+  </body>
+
+  </html>
