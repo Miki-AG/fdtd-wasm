@@ -116,9 +116,16 @@ function generateReport() {
         'comms::demodulator::process_sample': ['test_demodulator_perfect_signal_fsk', 'test_demodulator_perfect_signal_ask'],
         'comms::demodulator::get_text': ['test_demodulator_perfect_signal_fsk'], // Indirectly typically checked via decoding
         'comms::demodulator::new': ['test_demodulator_perfect_signal_fsk'],
+        'comms::demodulator::set_scheme': ['test_demodulator_perfect_signal_ask'],
         'comms::packet::push_bit': ['test_text_to_bits_conversion'], // Implicit in packet forming
         'comms::modulator::next_modulation': ['test_modulator_sequence_fsk', 'test_modulator_ask'],
         'comms::modulator::load_text': ['test_modulator_sequence_fsk'],
+        'comms::modulator::set_scheme': ['test_modulator_ask'],
+
+        // These are effectively covered by the integration or basic logic tests but indirectly
+        'comms::packet::get_state': ['test_packet_decoder_state_transitions'],
+        'comms::packet::get_partial_payload': ['test_packet_decoder_state_transitions'],
+        'comms::modulator::get_bits_string': ['test_modulator_sequence_fsk'],
     };
 
     // APIs that are tested in WASM environment (wasm-pack test) but not cargo test
@@ -137,6 +144,17 @@ function generateReport() {
         'lib::process_receiver_signal',
         'FdtdSimulator::new'
     ];
+
+    // Manual descriptions ffor specific statuses
+    const manualDescriptions = {
+        'engine::apply_forced_source': 'Not currently used by simulation step',
+        'comms::demodulator::set_samples_per_symbol': 'Trivial setter',
+        'comms::demodulator::get_bits_string': 'Debug helper',
+        'comms::demodulator::get_state_string': 'Debug helper',
+        'comms::modulator::set_samples_per_symbol': 'Trivial setter',
+        'comms::modulator::get_bits_string': 'Debug helper',
+        'comms::packet::push_bit': 'Covered by packet formation logic',
+    };
 
     // Update Status
     for (const api of publicApis) {
@@ -168,6 +186,13 @@ function generateReport() {
         } else if (api.hasTest) {
             api.status = 'Test Written (Not Run/Wasm)';
         }
+
+        // Append description if available
+        if (manualDescriptions[api.name]) {
+            api.description = manualDescriptions[api.name];
+        } else {
+            api.description = '';
+        }
     }
 
     // --- GROUP BY MODULE ---
@@ -198,7 +223,7 @@ function generateReport() {
     });
 
     const totalApis = publicApis.length;
-    const apisWithTests = publicApis.filter(api => api.hasTest).length;
+    const apisWithTests = publicApis.filter(api => api.status.startsWith('Pass')).length;
     const apisWithoutTests = totalApis - apisWithTests;
 
     let columnsHtml = '';
@@ -228,10 +253,17 @@ function generateReport() {
             `;
 
             apis.forEach(api => {
+                let statusContent = api.status;
+                if (api.status === 'No Test' && api.description) {
+                    statusContent += `<div class="status-desc">${api.description}</div>`;
+                }
+
                 colContent += `
                             <tr>
                                 <td>${api.name}</td>
-                                <td class="status-${api.status.replace(/[\s\(\)\/]/g, '')}">${api.status}</td>
+                                <td class="status-${api.status.replace(/[\s\(\)\/]/g, '')}">
+                                    ${statusContent}
+                                </td>
                             </tr>
                 `;
             });
@@ -253,7 +285,7 @@ function generateReport() {
     <meta charset="UTF-8">
     <title>API & Test Coverage Report</title>
     <style>
-        body { font-family: sans-serif; font-size: 11px; padding: 10px; background-color: #f4f4f4; margin: 0; }
+        body { font-family: sans-serif; font-size: 11px; padding: 10px; background-color: #f4f4f4; margin: 0; padding-bottom: 40px; }
         h1 { font-size: 16px; margin: 10px 0; text-align: center; position: relative; }
         h2 { font-size: 13px; margin-top: 5px; margin-bottom: 5px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 3px; }
         .summary { font-size: 11px; margin-bottom: 10px; font-weight: bold; text-align: center; background: white; padding: 8px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
@@ -305,6 +337,20 @@ function generateReport() {
         .status-NoTest { background-color: #fcf8e3; color: #8a6d3b; }
         .status-TestWrittenNotRunWasm { background-color: #d9edf7; color: #31708f; }
         .status-ExpectedFailWASM { background-color: #e0e0e0; color: #555; font-style: italic; }
+
+        .status-desc { font-weight: normal; font-size: 9px; color: #666; margin-top: 2px; font-style: italic; }
+        
+        /* Legend */
+        .legend {
+            margin-top: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .legend h3 { margin: 0 0 10px 0; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 11px; }
+        .legend-box { width: 16px; height: 16px; border-radius: 2px; border: 1px solid #ddd; }
 
         ul { columns: 3; -webkit-columns: 3; -moz-columns: 3; font-size: 10px; padding-left: 15px; margin: 0; }
         li { margin-bottom: 1px; }
@@ -360,11 +406,19 @@ function generateReport() {
     </h1>
     <div class="summary">
         Date: ${new Date().toLocaleString()}<br>
-        Total APIs: ${totalApis} | APIs with Tests: ${apisWithTests} | APIs without Tests: ${apisWithoutTests}
+        Total APIs: ${totalApis} | Passing: ${apisWithTests} | Untested/Failing: ${apisWithoutTests}
     </div>
 
     <div class="columns-container">
         ${columnsHtml}
+    </div>
+
+    <div class="legend">
+        <h3>Legend</h3>
+        <div class="legend-item"><div class="legend-box status-Pass"></div><div><strong>Pass</strong>: Verified by native 'cargo test'</div></div>
+        <div class="legend-item"><div class="legend-box status-PassWASM"></div><div><strong>Pass (WASM)</strong>: Verified by 'wasm-pack test' (browser simulation)</div></div>
+        <div class="legend-item"><div class="legend-box status-NoTest"></div><div><strong>No Test</strong>: Function not explicitly covered by a named test case</div></div>
+        <div class="legend-item"><div class="legend-box status-Fail"></div><div><strong>Fail</strong>: Test exists but currently failing</div></div>
     </div>
 
     <div class="module-group full-width-section">

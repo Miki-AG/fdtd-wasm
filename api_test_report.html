@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>API & Test Coverage Report</title>
     <style>
-        body { font-family: sans-serif; font-size: 11px; padding: 10px; background-color: #f4f4f4; margin: 0; }
+        body { font-family: sans-serif; font-size: 11px; padding: 10px; background-color: #f4f4f4; margin: 0; padding-bottom: 40px; }
         h1 { font-size: 16px; margin: 10px 0; text-align: center; position: relative; }
         h2 { font-size: 13px; margin-top: 5px; margin-bottom: 5px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 3px; }
         .summary { font-size: 11px; margin-bottom: 10px; font-weight: bold; text-align: center; background: white; padding: 8px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
@@ -57,6 +57,20 @@
         .status-NoTest { background-color: #fcf8e3; color: #8a6d3b; }
         .status-TestWrittenNotRunWasm { background-color: #d9edf7; color: #31708f; }
         .status-ExpectedFailWASM { background-color: #e0e0e0; color: #555; font-style: italic; }
+
+        .status-desc { font-weight: normal; font-size: 9px; color: #666; margin-top: 2px; font-style: italic; }
+        
+        /* Legend */
+        .legend {
+            margin-top: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .legend h3 { margin: 0 0 10px 0; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 11px; }
+        .legend-box { width: 16px; height: 16px; border-radius: 2px; border: 1px solid #ddd; }
 
         ul { columns: 3; -webkit-columns: 3; -moz-columns: 3; font-size: 10px; padding-left: 15px; margin: 0; }
         li { margin-bottom: 1px; }
@@ -111,8 +125,8 @@
         </div>
     </h1>
     <div class="summary">
-        Date: 12/12/2025, 10:06:26 AM<br>
-        Total APIs: 60 | APIs with Tests: 0 | APIs without Tests: 60
+        Date: 12/12/2025, 10:11:06 AM<br>
+        Total APIs: 60 | Passing: 54 | Untested/Failing: 6
     </div>
 
     <div class="columns-container">
@@ -130,7 +144,9 @@
             
                             <tr>
                                 <td>parameters::validate_parameters</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                         </tbody>
@@ -150,17 +166,23 @@
             
                             <tr>
                                 <td>state::new</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>state::reset</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>SimulationState::new</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                         </tbody>
@@ -180,22 +202,30 @@
             
                             <tr>
                                 <td>rasterizer::parse_svg_path</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>rasterizer::rasterize_obstacles</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>rasterizer::rasterize_path</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>rasterizer::fill_path_on_grid</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                         </tbody>
@@ -215,12 +245,16 @@
             
                             <tr>
                                 <td>renderer::render</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>renderer::map_value_to_color</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                         </tbody>
@@ -240,52 +274,72 @@
             
                             <tr>
                                 <td>engine::update_hx</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>engine::update_hy</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>engine::update_e_fields</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>engine::apply_source</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>engine::apply_forced_source</td>
-                                <td class="status-NoTest">No Test</td>
+                                <td class="status-NoTest">
+                                    No Test<div class="status-desc">Not currently used by simulation step</div>
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>engine::apply_boundary_left</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>engine::apply_boundary_right</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>engine::apply_boundary_top</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>engine::apply_boundary_bottom</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>engine::compute_source_signal</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                         </tbody>
@@ -305,7 +359,9 @@
             
                             <tr>
                                 <td>step::step</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                         </tbody>
@@ -325,77 +381,107 @@
             
                             <tr>
                                 <td>lib::new</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>lib::step</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>lib::set_comms_scheme</td>
-                                <td class="status-PassWASM">Pass (WASM)</td>
+                                <td class="status-PassWASM">
+                                    Pass (WASM)
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>lib::set_symbol_duration</td>
-                                <td class="status-PassWASM">Pass (WASM)</td>
+                                <td class="status-PassWASM">
+                                    Pass (WASM)
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>lib::send_message</td>
-                                <td class="status-PassWASM">Pass (WASM)</td>
+                                <td class="status-PassWASM">
+                                    Pass (WASM)
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>lib::get_transmission_bits</td>
-                                <td class="status-PassWASM">Pass (WASM)</td>
+                                <td class="status-PassWASM">
+                                    Pass (WASM)
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>lib::get_received_text</td>
-                                <td class="status-PassWASM">Pass (WASM)</td>
+                                <td class="status-PassWASM">
+                                    Pass (WASM)
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>lib::get_received_partial_text</td>
-                                <td class="status-PassWASM">Pass (WASM)</td>
+                                <td class="status-PassWASM">
+                                    Pass (WASM)
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>lib::get_received_bits</td>
-                                <td class="status-PassWASM">Pass (WASM)</td>
+                                <td class="status-PassWASM">
+                                    Pass (WASM)
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>lib::get_demodulator_status</td>
-                                <td class="status-PassWASM">Pass (WASM)</td>
+                                <td class="status-PassWASM">
+                                    Pass (WASM)
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>lib::get_frame_buffer</td>
-                                <td class="status-PassWASM">Pass (WASM)</td>
+                                <td class="status-PassWASM">
+                                    Pass (WASM)
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>lib::get_current_step</td>
-                                <td class="status-PassWASM">Pass (WASM)</td>
+                                <td class="status-PassWASM">
+                                    Pass (WASM)
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>lib::get_field_at</td>
-                                <td class="status-PassWASM">Pass (WASM)</td>
+                                <td class="status-PassWASM">
+                                    Pass (WASM)
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>lib::process_receiver_signal</td>
-                                <td class="status-PassWASM">Pass (WASM)</td>
+                                <td class="status-PassWASM">
+                                    Pass (WASM)
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>FdtdSimulator::new</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                         </tbody>
@@ -415,12 +501,16 @@
             
                             <tr>
                                 <td>utils::log</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>utils::set_panic_hook</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                         </tbody>
@@ -440,42 +530,58 @@
             
                             <tr>
                                 <td>comms::modulator::text_to_bits</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>comms::modulator::new</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>comms::modulator::set_scheme</td>
-                                <td class="status-NoTest">No Test</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>comms::modulator::set_samples_per_symbol</td>
-                                <td class="status-NoTest">No Test</td>
+                                <td class="status-NoTest">
+                                    No Test<div class="status-desc">Trivial setter</div>
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>comms::modulator::load_text</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>comms::modulator::next_modulation</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>comms::modulator::get_bits_string</td>
-                                <td class="status-NoTest">No Test</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>Modulator::new</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                         </tbody>
@@ -495,47 +601,65 @@
             
                             <tr>
                                 <td>comms::demodulator::new</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>comms::demodulator::set_scheme</td>
-                                <td class="status-NoTest">No Test</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>comms::demodulator::set_samples_per_symbol</td>
-                                <td class="status-NoTest">No Test</td>
+                                <td class="status-NoTest">
+                                    No Test<div class="status-desc">Trivial setter</div>
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>comms::demodulator::process_sample</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>comms::demodulator::get_text</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>comms::demodulator::get_partial_text</td>
-                                <td class="status-NoTest">No Test</td>
+                                <td class="status-NoTest">
+                                    No Test
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>comms::demodulator::get_bits_string</td>
-                                <td class="status-NoTest">No Test</td>
+                                <td class="status-NoTest">
+                                    No Test<div class="status-desc">Debug helper</div>
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>comms::demodulator::get_state_string</td>
-                                <td class="status-NoTest">No Test</td>
+                                <td class="status-NoTest">
+                                    No Test<div class="status-desc">Debug helper</div>
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>Demodulator::new</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                         </tbody>
@@ -555,33 +679,51 @@
             
                             <tr>
                                 <td>comms::packet::new</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>comms::packet::push_bit</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>comms::packet::get_state</td>
-                                <td class="status-NoTest">No Test</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>comms::packet::get_partial_payload</td>
-                                <td class="status-NoTest">No Test</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                             <tr>
                                 <td>PacketDecoder::new</td>
-                                <td class="status-Pass">Pass</td>
+                                <td class="status-Pass">
+                                    Pass
+                                </td>
                             </tr>
                 
                         </tbody>
                     </table>
                 </div>
             </div>
+    </div>
+
+    <div class="legend">
+        <h3>Legend</h3>
+        <div class="legend-item"><div class="legend-box status-Pass"></div><div><strong>Pass</strong>: Verified by native 'cargo test'</div></div>
+        <div class="legend-item"><div class="legend-box status-PassWASM"></div><div><strong>Pass (WASM)</strong>: Verified by 'wasm-pack test' (browser simulation)</div></div>
+        <div class="legend-item"><div class="legend-box status-NoTest"></div><div><strong>No Test</strong>: Function not explicitly covered by a named test case</div></div>
+        <div class="legend-item"><div class="legend-box status-Fail"></div><div><strong>Fail</strong>: Test exists but currently failing</div></div>
     </div>
 
     <div class="module-group full-width-section">
