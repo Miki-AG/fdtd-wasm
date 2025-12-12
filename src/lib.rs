@@ -53,4 +53,13 @@ impl FdtdSimulator {
     pub fn get_current_step(&self) -> usize {
         self.state.time_step
     }
+
+    /// Returns the electric field value at a specific coordinate.
+    pub fn get_field_at(&self, x: usize, y: usize) -> f64 {
+        if x < self.params.width && y < self.params.height {
+            self.state.ez[y * self.params.width + x]
+        } else {
+            0.0
+        }
+    }
 }

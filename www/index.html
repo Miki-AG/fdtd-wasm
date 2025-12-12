@@ -5,55 +5,55 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FDTD WASM Simulator</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: row;
-      align-items: start;
-      background: #222;
-      color: #eee;
-    }
-
-    h1 {
-      margin-bottom: 10px;
-    }
-
-    canvas {
-      border: 1px solid #555;
-      background: #000;
-    }
-
-    #controls {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      align-items: start;
-      justify-content: start;
-      margin: 10px;
-    }
-
-    button {
-      padding: 8px 16px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    #stats {
-      font-family: monospace;
-    }
-  </style>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: #222; color: #eee; }
+        h1 { margin-bottom: 10px; }
+        canvas { border: 1px solid #555; background: #000; }
+        #controls { margin-top: 15px; display: flex; gap: 10px; align-items: center; }
+        button { padding: 8px 16px; cursor: pointer; font-size: 16px; }
+        #stats { font-family: monospace; }
+        #signalContainer {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #111;
+            border: 1px solid #444;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #signalCanvas {
+            border: 1px solid #333;
+            background: #000;
+        }
+        #signalLabel { font-size: 12px; margin-bottom: 2px; }
+    </style>
 </head>
-
 <body>
-  <canvas id="simCanvas"></canvas>
-  <div id="controls">
-    <h1>2D FDTD Simulator </h1>
-    <p>WASM + Rust</p>
-    <button id="toggleBtn">Start</button>
-    <button id="resetBtn">Reset</button>
-    <div id="stats">Step: 0</div>
-  </div>
+    <h1>2D FDTD Simulator (Rust + WASM)</h1>
+    <canvas id="simCanvas"></canvas>
+    
+    <div id="signalContainer">
+        <div id="signalLabel">Received Signal</div>
+        <canvas id="signalCanvas" width="100" height="100"></canvas>
+    </div>
+
+    <div id="controls">
+        <button id="toggleBtn">Start</button>
+        <button id="resetBtn">Reset</button>
+        <select id="signalType">
+            <option value="ContinuousSine">Continuous Sine</option>
+            <option value="ContinuousSquare">Continuous Square</option>
+            <option value="PulseSine">Pulse Sine</option>
+            <option value="PulseSquare">Pulse Square</option>
+        </select>
+        <select id="scenarioSelect">
+            <option value="box">Simple Box</option>
+            <option value="double_parabola">Double Parabolic Antenna</option>
+        </select>
+        <div id="stats">Step: 0</div>
+    </div>
 
   <script type="module" src="./index.js"></script>
 </body>

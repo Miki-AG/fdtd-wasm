@@ -11,11 +11,20 @@ pub struct SimulationParameters {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum SignalType {
+    ContinuousSine,
+    ContinuousSquare,
+    PulseSine,
+    PulseSquare,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SourceDefinition {
     pub x: usize,
     pub y: usize,
     pub amplitude: f64,
     pub frequency: f64,
+    pub signal_type: SignalType,
 }
 
 /// Validates the parameters (e.g., source within bounds).

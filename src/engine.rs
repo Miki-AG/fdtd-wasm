@@ -1,5 +1,5 @@
 use crate::state::SimulationState;
-use crate::parameters::SourceDefinition;
+use crate::parameters::{SourceDefinition, SignalType};
 
 /// Updates the magnetic field Hx for one time step.
 pub fn update_hx(state: &mut SimulationState) {
@@ -62,20 +62,28 @@ pub fn update_e_fields(state: &mut SimulationState) {
 /// Applies the source function to the grid.
 pub fn apply_source(state: &mut SimulationState, source: &SourceDefinition) {
     let t = state.time_step as f64;
-    let val = compute_source_signal(t, source.frequency, source.amplitude);
+    let val = compute_source_signal(t, source.frequency, source.amplitude, &source.signal_type);
     let idx = source.y * state.width + source.x;
     if idx < state.ez.len() {
         state.ez[idx] += val; // Soft source
     }
 }
 
+// ... boundaries unchanged ... (leaving this comment here is fine as I am replacing the blocks above/below boundaries if I match correctly, but I will match the exact blocks)
+
 /// Applies Absorbing Boundary Conditions (ABC) to the Left boundary.
 pub fn apply_boundary_left(state: &mut SimulationState) {
-    // Simple PEC (Perfect Electric Conductor) - Force 0
     let w = state.width;
     let h = state.height;
-    for y in 0..h {
-        state.ez[y * w] = 0.0;
+    let depth = 20.min(w / 2);
+    
+    for x in 0..depth {
+        let factor = (x as f64 / depth as f64).powi(2); // Parabolic profile 0->1
+        for y in 0..h {
+            state.ez[y * w + x] *= factor;
+            state.hx[y * w + x] *= factor;
+            state.hy[y * w + x] *= factor;
+        }
     }
 }
 
@@ -83,19 +91,32 @@ pub fn apply_boundary_left(state: &mut SimulationState) {
 pub fn apply_boundary_right(state: &mut SimulationState) {
     let w = state.width;
     let h = state.height;
-    for y in 0..h {
-        state.ez[y * w + (w - 1)] = 0.0;
+    let depth = 20.min(w / 2);
+    
+    for x in 0..depth {
+        let factor = (x as f64 / depth as f64).powi(2);
+        let actual_x = w - 1 - x;
+        for y in 0..h {
+            state.ez[y * w + actual_x] *= factor;
+            state.hx[y * w + actual_x] *= factor;
+            state.hy[y * w + actual_x] *= factor;
+        }
     }
 }
 
 /// Applies Absorbing Boundary Conditions (ABC) to the Top boundary.
 pub fn apply_boundary_top(state: &mut SimulationState) {
-    // Top corresponds to y = 0 or y = h-1 depending on coords.
-    // Assuming y=0 is top in SVG coords usually? Or bottom?
-    // Let's just do y=0 line.
     let w = state.width;
-    for x in 0..w {
-        state.ez[x] = 0.0;
+    let h = state.height;
+    let depth = 20.min(h / 2);
+    
+    for y in 0..depth {
+        let factor = (y as f64 / depth as f64).powi(2);
+        for x in 0..w {
+            state.ez[y * w + x] *= factor;
+            state.hx[y * w + x] *= factor;
+            state.hy[y * w + x] *= factor;
+        }
     }
 }
 
@@ -103,13 +124,48 @@ pub fn apply_boundary_top(state: &mut SimulationState) {
 pub fn apply_boundary_bottom(state: &mut SimulationState) {
     let w = state.width;
     let h = state.height;
-    let offset = (h - 1) * w;
-    for x in 0..w {
-        state.ez[offset + x] = 0.0;
+    let depth = 20.min(h / 2);
+    
+    for y in 0..depth {
+        let factor = (y as f64 / depth as f64).powi(2);
+        let actual_y = h - 1 - y;
+        for x in 0..w {
+            state.ez[actual_y * w + x] *= factor;
+            state.hx[actual_y * w + x] *= factor;
+            state.hy[actual_y * w + x] *= factor;
+        }
     }
 }
 
 /// Helper to compute the signal value at a given time `t`.
-pub fn compute_source_signal(t: f64, frequency: f64, amplitude: f64) -> f64 {
-    amplitude * (2.0 * std::f64::consts::PI * frequency * t).sin()
+pub fn compute_source_signal(t: f64, frequency: f64, amplitude: f64, signal_type: &SignalType) -> f64 {
+    let omega = 2.0 * std::f64::consts::PI * frequency;
+    match signal_type {
+        SignalType::ContinuousSine => {
+            amplitude * (omega * t).sin()
+        },
+        SignalType::ContinuousSquare => {
+            amplitude * (omega * t).sin().signum()
+        },
+        SignalType::PulseSine => {
+            // Single cycle sine wave
+            let period = 1.0 / frequency;
+            if t < period {
+                amplitude * (omega * t).sin()
+            } else {
+                0.0
+            }
+        },
+        SignalType::PulseSquare => {
+            // Single square pulse (half period duration)
+            let period = 1.0 / frequency;
+            if t < period / 2.0 {
+                amplitude
+            } else if t < period {
+                -amplitude
+            } else {
+                0.0
+            }
+        }
+    }
 }
