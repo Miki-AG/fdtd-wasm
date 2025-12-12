@@ -87,7 +87,23 @@ function getScenarioConfig(type) {
                 createParabolaPath(largeVertexX, HEIGHT/2, largeFocalLen, 400, false)
             ]
         };
+    } else if (type === 'free_space') {
+        return {
+            source: {
+                x: WIDTH / 4,
+                y: HEIGHT / 2,
+                amplitude: 50.0,
+                frequency: freq,
+                signal_type: signalSelect.value
+            },
+            receiver: {
+                x: WIDTH * 3 / 4,
+                y: HEIGHT / 2
+            },
+            obstacles: [] // No obstacles
+        };
     } else {
+        // Default Box
         return {
             source: {
                 x: WIDTH / 4,
