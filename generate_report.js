@@ -122,6 +122,7 @@ function generateReport() {
         'comms::modulator::next_modulation': ['test_modulator_sequence_fsk', 'test_modulator_ask'],
         'comms::modulator::load_text': ['test_modulator_sequence_fsk'],
         'comms::modulator::set_scheme': ['test_modulator_ask'],
+        'engine::apply_forced_source': ['test_apply_forced_source'],
 
         // These are effectively covered by the integration or basic logic tests but indirectly
         'comms::packet::get_state': ['test_packet_decoder_state_transitions'],
@@ -148,7 +149,6 @@ function generateReport() {
 
     // Manual descriptions ffor specific statuses
     const manualDescriptions = {
-        'engine::apply_forced_source': 'Not currently used by simulation step',
         'comms::demodulator::set_samples_per_symbol': 'Trivial setter',
         'comms::demodulator::get_bits_string': 'Debug helper',
         'comms::demodulator::get_state_string': 'Debug helper',

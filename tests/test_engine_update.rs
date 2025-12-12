@@ -1,4 +1,4 @@
-use fdtd_wasm::engine::{update_hx, update_hy, update_e_fields, apply_source};
+use fdtd_wasm::engine::{update_hx, update_hy, update_e_fields, apply_source, apply_forced_source};
 use fdtd_wasm::state::SimulationState;
 use fdtd_wasm::parameters::{SourceDefinition, SignalType};
 
@@ -83,4 +83,18 @@ fn test_update_e_fields_logic() {
     // Ez += 0.5 * (0 - 1) = -0.5.
     update_e_fields(&mut state);
     assert_eq!(state.ez[55], -0.5);
+}
+
+#[test]
+fn test_apply_forced_source() {
+    let mut state = SimulationState::new(10, 10);
+    // Source at (5,5)
+    apply_forced_source(&mut state, 5, 5, 10.0);
+    
+    // Check if value was added
+    assert_eq!(state.ez[55], 10.0);
+    
+    // Apply again to verify accumulation (it's +=)
+    apply_forced_source(&mut state, 5, 5, 5.0);
+    assert_eq!(state.ez[55], 15.0);
 }
