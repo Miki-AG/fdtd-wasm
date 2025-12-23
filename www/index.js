@@ -8,8 +8,8 @@ let idleCounter = 0;
 let currentScenarioConfig = null;
 let signalHistory = new Array(100).fill(0); // 100px wide
 
-const WIDTH = 1000;
-const HEIGHT = 600;
+let WIDTH = 1000;
+let HEIGHT = 600;
 
 // --- DOM Elements ---
 const canvas = document.getElementById('simCanvas');
@@ -377,8 +377,32 @@ function renderLoop() {
 
 // --- Initialization ---
 
+async function loadConfig() {
+    try {
+        const response = await fetch('./config.json');
+        const config = await response.json();
+        
+        WIDTH = config.dimensions.width;
+        HEIGHT = config.dimensions.height;
+        
+        params.scenario = config.simulation.scenario;
+        params.modulation = config.simulation.modulation;
+        params.rate = config.simulation.rate;
+        params.noise = config.simulation.noise;
+        params.gain = config.simulation.gain;
+        params.signalScale = config.ui.signalScale;
+        params.spectrumScale = config.ui.spectrumScale;
+        
+        canvas.width = WIDTH;
+        canvas.height = HEIGHT;
+    } catch (e) {
+        console.warn("Could not load config.json, using hardcoded defaults.", e);
+    }
+}
+
 async function run() {
     await init();
+    await loadConfig();
     resetSimulation();
 }
 
