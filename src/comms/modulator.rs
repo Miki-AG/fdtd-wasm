@@ -107,4 +107,8 @@ impl Modulator {
     pub fn get_bits_string(&self) -> String {
         self.bits.iter().map(|b| b.to_string()).collect()
     }
+
+    pub fn get_current_bit_idx(&self) -> usize {
+        self.current_bit_idx
+    }
 }

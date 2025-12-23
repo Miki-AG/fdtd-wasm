@@ -17,6 +17,7 @@ const ctx = canvas.getContext('2d');
 const signalCanvas = document.getElementById('signalCanvas');
 const fftCanvas = document.getElementById('fftCanvas');
 const statsDiv = document.getElementById('stats');
+const queueBody = document.getElementById('queueBody');
 
 const params = {
     scenario: 'free_space',
@@ -42,6 +43,7 @@ const txPane = new Tweakpane.Pane({
 txPane.addInput(params, 'message', { label: 'Message' });
 txPane.addButton({ title: 'Send Message' }).on('click', () => {
     if (simulator && params.message) {
+        prepareEmitterQueue(params.message);
         simulator.send_message(params.message);
         params.txBits = simulator.get_transmission_bits();
         params.message = '';
@@ -131,6 +133,69 @@ canvas.width = WIDTH;
 canvas.height = HEIGHT;
 
 // --- Helper Functions ---
+
+function prepareEmitterQueue(text) {
+    if (!queueBody) return;
+    queueBody.innerHTML = '';
+    
+    const bytes = [];
+    bytes.push({ label: 'PRE', val: 0xAA });
+    bytes.push({ label: 'SYNC', val: 0x7E });
+    
+    const len = Math.min(text.length, 255);
+    bytes.push({ label: 'LEN', val: len });
+    
+    let sum = 0;
+    for (let i = 0; i < len; i++) {
+        const charCode = text.charCodeAt(i);
+        bytes.push({ label: text[i], val: charCode });
+        sum += charCode;
+    }
+    
+    bytes.push({ label: 'CRC', val: sum % 256 });
+    
+    bytes.forEach((byte, byteIdx) => {
+        const tr = document.createElement('tr');
+        const tdCmd = document.createElement('td');
+        tdCmd.className = 'col-cmd';
+        tdCmd.textContent = byte.label;
+        
+        const tdBin = document.createElement('td');
+        tdBin.className = 'col-bin';
+        
+        const binStr = byte.val.toString(2).padStart(8, '0');
+        for (let i = 0; i < 8; i++) {
+            const span = document.createElement('span');
+            span.className = 'bit';
+            span.id = `bit-${byteIdx * 8 + i}`;
+            span.textContent = binStr[i];
+            tdBin.appendChild(span);
+        }
+        
+        tr.appendChild(tdCmd);
+        tr.appendChild(tdBin);
+        queueBody.appendChild(tr);
+    });
+}
+
+function updateQueueView() {
+    if (!simulator || !queueBody) return;
+    const bitIdx = simulator.get_transmission_bit_idx();
+    const bits = queueBody.querySelectorAll('.bit');
+    
+    // Opt-out if index is beyond bits (idle)
+    if (bitIdx > bits.length) return;
+
+    for (let i = 0; i < bits.length; i++) {
+        if (i < bitIdx) {
+            bits[i].className = 'bit done';
+        } else if (i === bitIdx) {
+            bits[i].className = 'bit active';
+        } else {
+            bits[i].className = 'bit';
+        }
+    }
+}
 
 function createParabolaPath(vertexX, vertexY, focalLength, height, openingRight = true) {
     const a = 1.0 / (4.0 * focalLength);
@@ -371,6 +436,7 @@ function renderLoop() {
     draw();
     updateStats();
     updateCommsUI();
+    updateQueueView();
 
     animationId = requestAnimationFrame(renderLoop);
 }

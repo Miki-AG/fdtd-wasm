@@ -99,6 +99,10 @@ impl FdtdSimulator {
         self.modulator.get_bits_string()
     }
 
+    pub fn get_transmission_bit_idx(&self) -> usize {
+        self.modulator.get_current_bit_idx()
+    }
+
     pub fn get_received_text(&self) -> String {
         self.demodulator.get_text()
     }
