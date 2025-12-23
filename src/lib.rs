@@ -119,6 +119,18 @@ impl FdtdSimulator {
         self.demodulator.get_state_string()
     }
 
+    pub fn get_receiver_history(&self) -> JsValue {
+        serde_wasm_bindgen::to_value(&self.demodulator.get_history()).unwrap()
+    }
+
+    pub fn get_receiver_current_bits(&self) -> String {
+        self.demodulator.get_current_bits()
+    }
+
+    pub fn reset_receiver(&mut self) {
+        self.demodulator.reset_decoder();
+    }
+
     /// Returns a pointer to the image buffer (RGBA) for the current state.
     pub fn get_frame_buffer(&self) -> Vec<u8> {
         renderer::render(&self.state)

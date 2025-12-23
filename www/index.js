@@ -18,6 +18,7 @@ const signalCanvas = document.getElementById('signalCanvas');
 const fftCanvas = document.getElementById('fftCanvas');
 const statsDiv = document.getElementById('stats');
 const queueBody = document.getElementById('queueBody');
+const receptorQueueBody = document.getElementById('receptorQueueBody');
 
 const params = {
     scenario: 'free_space',
@@ -197,6 +198,53 @@ function updateQueueView() {
     }
 }
 
+function updateReceptorQueue() {
+    if (!simulator || !receptorQueueBody) return;
+    
+    const history = simulator.get_receiver_history();
+    const currentBits = simulator.get_receiver_current_bits();
+    
+    // Clear and rebuild (simple for now, can be optimized)
+    receptorQueueBody.innerHTML = '';
+    
+    // Finished events
+    history.forEach(event => {
+        const tr = document.createElement('tr');
+        const tdBin = document.createElement('td');
+        tdBin.className = 'col-bin-rx';
+        tdBin.textContent = event.bits;
+        
+        const tdCmd = document.createElement('td');
+        tdCmd.className = 'col-cmd-rx';
+        tdCmd.textContent = event.label;
+        
+        tr.appendChild(tdBin);
+        tr.appendChild(tdCmd);
+        receptorQueueBody.appendChild(tr);
+    });
+    
+    // In-progress row
+    if (currentBits.length > 0) {
+        const tr = document.createElement('tr');
+        const tdBin = document.createElement('td');
+        tdBin.className = 'col-bin-rx';
+        tdBin.textContent = currentBits;
+        
+        const tdCmd = document.createElement('td');
+        tdCmd.className = 'col-cmd-rx';
+        tdCmd.textContent = "...";
+        
+        tr.appendChild(tdBin);
+        tr.appendChild(tdCmd);
+        receptorQueueBody.appendChild(tr);
+    }
+}
+
+function resetReceptorQueue() {
+    if (receptorQueueBody) receptorQueueBody.innerHTML = '';
+    if (simulator) simulator.reset_receiver();
+}
+
 function createParabolaPath(vertexX, vertexY, focalLength, height, openingRight = true) {
     const a = 1.0 / (4.0 * focalLength);
     const direction = openingRight ? 1.0 : -1.0;
@@ -358,6 +406,7 @@ function updateStats() {
 function resetSimulation() {
     stopSimulation();
     signalHistory.fill(0);
+    resetReceptorQueue();
 
     try {
         const config = getConfig();
@@ -437,6 +486,7 @@ function renderLoop() {
     updateStats();
     updateCommsUI();
     updateQueueView();
+    updateReceptorQueue();
 
     animationId = requestAnimationFrame(renderLoop);
 }

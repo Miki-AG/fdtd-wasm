@@ -142,6 +142,47 @@
     .bit.done {
         color: #888;
     }
+
+    /* Receptor Queue View */
+    #receptorQueueContainer {
+      margin-top: 15px;
+      border-top: 1px solid #333;
+      padding-top: 15px;
+      overflow-y: auto;
+      max-height: 400px;
+    }
+
+    .receptor-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: monospace;
+      font-size: 11px;
+    }
+
+    .receptor-table th {
+      text-align: left;
+      color: #555;
+      padding-bottom: 5px;
+      text-transform: uppercase;
+      font-size: 10px;
+    }
+
+    .receptor-table td {
+      padding: 4px 0;
+      border-bottom: 1px solid #222;
+    }
+
+    .col-bin-rx {
+      letter-spacing: 2px;
+      color: #fff;
+    }
+
+    .col-cmd-rx {
+      width: 40px;
+      color: #888;
+      text-align: right;
+      padding-right: 5px;
+    }
   </style>
 </head>
 
@@ -183,6 +224,21 @@
     <div id="rightColumn" class="column">
       <div class="column-title">Receiver</div>
       <div id="rxPaneContainer"></div>
+      
+      <div id="receptorQueueContainer">
+        <div class="column-title">Receptor Queue</div>
+        <table class="receptor-table">
+          <thead>
+            <tr>
+              <th class="col-bin-rx">Binary</th>
+              <th class="col-cmd-rx">CMD</th>
+            </tr>
+          </thead>
+          <tbody id="receptorQueueBody">
+            <!-- Populated via JS -->
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 

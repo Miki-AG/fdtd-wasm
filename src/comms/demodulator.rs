@@ -116,6 +116,19 @@ impl Demodulator {
     pub fn get_bits_string(&self) -> String {
         self.received_bits_debug.clone()
     }
+
+    pub fn get_history(&self) -> Vec<crate::comms::packet::DecodeEvent> {
+        self.decoder.history.clone()
+    }
+
+    pub fn get_current_bits(&self) -> String {
+        self.decoder.current_bits_buffer.clone()
+    }
+
+    pub fn reset_decoder(&mut self) {
+        self.decoder.reset();
+        self.last_message.clear();
+    }
     
     pub fn get_state_string(&self) -> String {
         format!("{:?}", self.decoder.get_state())

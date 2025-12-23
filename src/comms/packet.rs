@@ -1,4 +1,6 @@
-#[derive(Debug, PartialEq, Clone, Copy)]
+use serde::{Serialize, Deserialize};
+
+#[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
 pub enum PacketState {
     SearchPreamble, // Waiting for 0xAA pattern
     SearchSync,     // Waiting for 0x7E
@@ -6,6 +8,13 @@ pub enum PacketState {
     ReadPayload,    // Reading N bytes
     ReadCRC,        // Reading 1 byte CRC
     Done,           // Packet complete
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct DecodeEvent {
+    pub label: String,
+    pub bits: String,
+    pub is_complete: bool,
 }
 
 pub struct PacketDecoder {
@@ -16,6 +25,9 @@ pub struct PacketDecoder {
     length: u8,
     payload: Vec<u8>,
     crc: u8,
+    
+    pub history: Vec<DecodeEvent>,
+    pub current_bits_buffer: String,
 }
 
 impl PacketDecoder {
@@ -27,21 +39,45 @@ impl PacketDecoder {
             length: 0,
             payload: Vec::new(),
             crc: 0,
+            history: Vec::new(),
+            current_bits_buffer: String::new(),
         }
+    }
+
+    pub fn reset(&mut self) {
+        self.state = PacketState::SearchPreamble;
+        self.bit_count = 0;
+        self.buffer = 0;
+        self.payload.clear();
+        self.history.clear();
+        self.current_bits_buffer.clear();
     }
 
     pub fn push_bit(&mut self, bit: u8) -> Option<String> {
         // Shift bit into buffer (LSB in)
         self.buffer = (self.buffer << 1) | (bit & 1);
+        self.current_bits_buffer.push(if bit == 1 { '1' } else { '0' });
         
         match self.state {
             PacketState::SearchPreamble => {
                 if self.buffer == 0xAA {
+                    self.history.push(DecodeEvent {
+                        label: "PRE".to_string(),
+                        bits: self.current_bits_buffer.clone(),
+                        is_complete: true,
+                    });
+                    self.current_bits_buffer.clear();
                     self.state = PacketState::SearchSync;
                 }
             },
             PacketState::SearchSync => {
                 if self.buffer == 0x7E {
+                    self.history.push(DecodeEvent {
+                        label: "SYNC".to_string(),
+                        bits: self.current_bits_buffer.clone(),
+                        is_complete: true,
+                    });
+                    self.current_bits_buffer.clear();
                     self.state = PacketState::ReadLength;
                     self.bit_count = 0;
                 }
@@ -50,6 +86,12 @@ impl PacketDecoder {
                 self.bit_count += 1;
                 if self.bit_count == 8 {
                     self.length = self.buffer;
+                    self.history.push(DecodeEvent {
+                        label: "LEN".to_string(),
+                        bits: self.current_bits_buffer.clone(),
+                        is_complete: true,
+                    });
+                    self.current_bits_buffer.clear();
                     self.state = PacketState::ReadPayload;
                     self.payload.clear();
                     self.bit_count = 0;
@@ -62,6 +104,13 @@ impl PacketDecoder {
                 self.bit_count += 1;
                 if self.bit_count == 8 {
                     self.payload.push(self.buffer);
+                    let label = String::from_utf8_lossy(&[self.buffer]).to_string();
+                    self.history.push(DecodeEvent {
+                        label,
+                        bits: self.current_bits_buffer.clone(),
+                        is_complete: true,
+                    });
+                    self.current_bits_buffer.clear();
                     self.bit_count = 0;
                     if self.payload.len() == self.length as usize {
                         self.state = PacketState::ReadCRC;
@@ -72,6 +121,13 @@ impl PacketDecoder {
                 self.bit_count += 1;
                 if self.bit_count == 8 {
                     self.crc = self.buffer;
+                    self.history.push(DecodeEvent {
+                        label: "CRC".to_string(),
+                        bits: self.current_bits_buffer.clone(),
+                        is_complete: true,
+                    });
+                    self.current_bits_buffer.clear();
+                    
                     // Validate CRC
                     let sum: u16 = self.payload.iter().map(|&b| b as u16).sum();
                     let calc_crc = (sum % 256) as u8;
