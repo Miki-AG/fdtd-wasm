@@ -83,17 +83,17 @@ paramsPane.addInput(params, 'modulation', {
 
 paramsPane.addInput(params, 'carrier_hz', {
     label: 'Carrier (Hz)',
-    min: 10000, max: 150000, step: 100
+    min: 1000000, max: 50000000, step: 100000
 }).on('change', () => resetSimulation());
 
 paramsPane.addInput(params, 'dev_hz', {
     label: 'Deviation (Hz)',
-    min: 1000, max: 50000, step: 100
+    min: 100000, max: 5000000, step: 10000
 }).on('change', () => resetSimulation());
 
 paramsPane.addInput(params, 'baud', {
     label: 'Baud Rate (bps)',
-    min: 300, max: 9600, step: 100
+    min: 1200, max: 256000, step: 1200
 }).on('change', () => resetSimulation());
 
 paramsPane.addInput(params, 'power', {

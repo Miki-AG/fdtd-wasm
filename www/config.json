@@ -4,13 +4,13 @@
         "height": 600
     },
     "physics": {
-        "c_ms": 343.0,
-        "dx_mm": 1.0
+        "c_ms": 299792458,
+        "dx_mm": 5000.0
     },
     "transmission": {
-        "carrier_hz": 30000,
-        "dev_hz": 5000,
-        "baud": 1200,
+        "carrier_hz": 10000000,
+        "dev_hz": 1000000,
+        "baud": 115200,
         "modulation": "FSK",
         "power_w": 1.0
     },

@@ -6,6 +6,7 @@ pub struct SimulationParameters {
     pub width: usize,
     pub height: usize,
     pub source: SourceDefinition,
+    pub comms: CommsDefinition,
     pub obstacles: Vec<String>, // SVG path strings
     pub duration_steps: usize,
 }
@@ -27,6 +28,13 @@ pub struct SourceDefinition {
     pub signal_type: SignalType,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct CommsDefinition {
+    pub carrier_frequency: f64,
+    pub deviation: f64,
+    pub symbol_duration: usize,
+}
+
 /// Validates the parameters (e.g., source within bounds).
 pub fn validate_parameters(params: &SimulationParameters) -> Result<(), String> {
     if params.width == 0 || params.height == 0 {
@@ -39,6 +47,9 @@ pub fn validate_parameters(params: &SimulationParameters) -> Result<(), String> 
     }
     if params.source.frequency <= 0.0 {
         return Err("Source frequency must be greater than 0".to_string());
+    }
+    if params.comms.symbol_duration == 0 {
+        return Err("Symbol duration must be greater than 0".to_string());
     }
     if params.duration_steps == 0 {
         return Err("Duration steps must be greater than 0".to_string());

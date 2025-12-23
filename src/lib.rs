@@ -35,12 +35,14 @@ impl FdtdSimulator {
 
         let width = params.width;
         let height = params.height;
-        let freq = params.source.frequency;
         
-        // FSK Parameters
-        let samples_per_symbol = 200; 
-        let freq_1 = freq;
-        let freq_0 = freq * 0.5; 
+        // Comms Parameters from Definition
+        let samples_per_symbol = params.comms.symbol_duration;
+        let carrier = params.comms.carrier_frequency;
+        let dev = params.comms.deviation;
+        
+        let freq_0 = carrier - dev;
+        let freq_1 = carrier + dev;
 
         Ok(FdtdSimulator {
             params,
@@ -58,9 +60,7 @@ impl FdtdSimulator {
         // 1. Modulator Override if transmitting
         if self.is_transmitting {
             if let Some((freq, amp_factor)) = self.modulator.next_modulation() {
-                 // Use a fixed max amplitude of 50.0 for now, or derive from existing params if we want to be fancy.
-                 // The modulator returns amp_factor (0.0 or 1.0) for ASK, or 1.0 for FSK.
-                 let max_amplitude = 50.0; 
+                 let max_amplitude = self.params.source.amplitude;
                  let amplitude = amp_factor * max_amplitude;
                  
                  // We need to compute the instantaneous value of the signal (Sine wave)
