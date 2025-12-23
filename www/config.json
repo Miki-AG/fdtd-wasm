@@ -1,17 +1,26 @@
 {
-  "dimensions": {
-    "width": 1000,
-    "height": 600
-  },
-  "simulation": {
-    "scenario": "free_space",
-    "modulation": "FSK",
-    "rate": 0,
-    "noise": 0,
-    "gain": 5
-  },
-  "ui": {
-    "signalScale": 1,
-    "spectrumScale": 1
-  }
+    "dimensions": {
+        "width": 1000,
+        "height": 600
+    },
+    "physics": {
+        "c_ms": 343.0,
+        "dx_mm": 1.0
+    },
+    "transmission": {
+        "carrier_hz": 30000,
+        "dev_hz": 5000,
+        "baud": 1200,
+        "modulation": "FSK",
+        "power_w": 1.0
+    },
+    "simulation": {
+        "scenario": "box",
+        "noise": 0.02,
+        "gain": 10
+    },
+    "ui": {
+        "signalScale": 1.0,
+        "spectrumScale": 0.5
+    }
 }

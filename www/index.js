@@ -11,6 +11,12 @@ let signalHistory = new Array(100).fill(0); // 100px wide
 let WIDTH = 1000;
 let HEIGHT = 600;
 
+// --- Physical Constants ---
+let C_MS = 343.0; // Speed of sound in air (m/s)
+let DX_MM = 1.0;  // 1 pixel = 1 mm
+let DT = 0;       // Seconds per step (calculated)
+let isQueueFrozen = false;
+
 // --- DOM Elements ---
 const canvas = document.getElementById('simCanvas');
 const ctx = canvas.getContext('2d');
@@ -23,9 +29,12 @@ const receptorQueueBody = document.getElementById('receptorQueueBody');
 const params = {
     scenario: 'free_space',
     modulation: 'FSK',
-    rate: 0,
-    noise: 0,
-    gain: 5,
+    carrier_hz: 40000,
+    dev_hz: 5000,
+    baud: 1200,
+    power: 1.0,
+    noise: 0.02,
+    gain: 10,
     message: '',
     txBits: '',
     rxBits: '',
@@ -70,19 +79,27 @@ paramsPane.addInput(params, 'scenario', {
 paramsPane.addInput(params, 'modulation', {
     label: 'Modulation',
     options: { ASK: 'ASK', FSK: 'FSK' }
-}).on('change', (ev) => {
-    if (simulator) simulator.set_comms_scheme(ev.value === 'ASK');
-});
+}).on('change', () => resetSimulation());
 
-paramsPane.addInput(params, 'rate', {
-    label: 'Bit Rate',
-    min: 0, max: 180, step: 1
-}).on('change', (ev) => {
-    if (simulator) {
-        const samples = 200 - ev.value;
-        simulator.set_symbol_duration(samples);
-    }
-});
+paramsPane.addInput(params, 'carrier_hz', {
+    label: 'Carrier (Hz)',
+    min: 10000, max: 150000, step: 100
+}).on('change', () => resetSimulation());
+
+paramsPane.addInput(params, 'dev_hz', {
+    label: 'Deviation (Hz)',
+    min: 1000, max: 50000, step: 100
+}).on('change', () => resetSimulation());
+
+paramsPane.addInput(params, 'baud', {
+    label: 'Baud Rate (bps)',
+    min: 300, max: 9600, step: 100
+}).on('change', () => resetSimulation());
+
+paramsPane.addInput(params, 'power', {
+    label: 'Power (W)',
+    min: 0.1, max: 100, step: 0.1
+}).on('change', () => resetSimulation());
 
 paramsPane.addInput(params, 'noise', {
     label: 'Noise Level',
@@ -199,7 +216,7 @@ function updateQueueView() {
 }
 
 function updateReceptorQueue() {
-    if (!simulator || !receptorQueueBody) return;
+    if (!simulator || !receptorQueueBody || isQueueFrozen) return;
     
     const history = simulator.get_receiver_history();
     const currentBits = simulator.get_receiver_current_bits();
@@ -210,6 +227,18 @@ function updateReceptorQueue() {
     // Finished events
     history.forEach(event => {
         const tr = document.createElement('tr');
+        
+        // Coloring logic
+        if (event.is_error) {
+            tr.className = 'row-error';
+        } else if (event.is_complete) {
+            tr.className = 'row-success';
+        }
+
+        if (event.label === 'CRC') {
+            isQueueFrozen = true;
+        }
+
         const tdBin = document.createElement('td');
         tdBin.className = 'col-bin-rx';
         tdBin.textContent = event.bits;
@@ -238,9 +267,16 @@ function updateReceptorQueue() {
         tr.appendChild(tdCmd);
         receptorQueueBody.appendChild(tr);
     }
+
+    // Auto-scroll to bottom
+    const container = document.getElementById('receptorQueueContainer');
+    if (container) {
+        container.scrollTop = container.scrollHeight;
+    }
 }
 
 function resetReceptorQueue() {
+    isQueueFrozen = false;
     if (receptorQueueBody) receptorQueueBody.innerHTML = '';
     if (simulator) simulator.reset_receiver();
 }
@@ -274,7 +310,10 @@ function createParabolaPath(vertexX, vertexY, focalLength, height, openingRight 
 }
 
 function getScenarioConfig(type) {
-    const freq = 0.05;
+    // FDTD Normalization
+    const dt = (DX_MM / 1000.0) / (C_MS * Math.sqrt(2));
+    const freqNorm = params.carrier_hz * dt;
+    const amp = 50.0 * Math.sqrt(params.power);
 
     if (type === 'double_parabola') {
         const smallVertexX = 100;
@@ -289,8 +328,8 @@ function getScenarioConfig(type) {
             source: {
                 x: smallFocusX,
                 y: HEIGHT / 2,
-                amplitude: 50.0,
-                frequency: freq,
+                amplitude: amp,
+                frequency: freqNorm,
                 signal_type: 'ContinuousSine'
             },
             receiver: {
@@ -307,8 +346,8 @@ function getScenarioConfig(type) {
             source: {
                 x: WIDTH / 4,
                 y: HEIGHT / 2,
-                amplitude: 50.0,
-                frequency: freq,
+                amplitude: amp,
+                frequency: freqNorm,
                 signal_type: 'ContinuousSine'
             },
             receiver: {
@@ -322,8 +361,8 @@ function getScenarioConfig(type) {
             source: {
                 x: WIDTH / 4,
                 y: HEIGHT / 2,
-                amplitude: 50.0,
-                frequency: freq,
+                amplitude: amp,
+                frequency: freqNorm,
                 signal_type: 'ContinuousSine'
             },
             receiver: {
@@ -339,10 +378,23 @@ function getScenarioConfig(type) {
 
 function getConfig() {
     currentScenarioConfig = getScenarioConfig(params.scenario);
+    
+    // Calculate DT based on current physics
+    DT = (DX_MM / 1000.0) / (C_MS * Math.sqrt(2));
+    
+    const carrierNorm = params.carrier_hz * DT;
+    const devNorm = params.dev_hz * DT;
+    const durationSteps = Math.floor((1.0 / params.baud) / DT);
+
     return {
         width: WIDTH,
         height: HEIGHT,
         source: currentScenarioConfig.source,
+        comms: {
+            carrier_frequency: carrierNorm,
+            deviation: devNorm,
+            symbol_duration: durationSteps
+        },
         obstacles: currentScenarioConfig.obstacles,
         duration_steps: 100000
     };
@@ -396,8 +448,20 @@ function draw() {
 }
 
 function updateStats() {
-    if (simulator) {
-        statsDiv.textContent = `Step: ${simulator.get_current_step()}`;
+    if (simulator && currentScenarioConfig) {
+        const step = simulator.get_current_step();
+        const timeMs = (step * DT * 1000).toFixed(2);
+        
+        let distMsg = "";
+        if (currentScenarioConfig.receiver) {
+            const dx_pixels = currentScenarioConfig.receiver.x - currentScenarioConfig.source.x;
+            const dy_pixels = currentScenarioConfig.receiver.y - currentScenarioConfig.source.y;
+            const pixDist = Math.sqrt(dx_pixels**2 + dy_pixels**2);
+            const metersDist = (pixDist * DX_MM / 1000.0).toFixed(2);
+            distMsg = ` | Dist: ${metersDist}m`;
+        }
+        
+        statsDiv.textContent = `Step: ${step} | Time: ${timeMs}ms${distMsg}`;
     }
 }
 
@@ -502,10 +566,18 @@ async function loadConfig() {
         HEIGHT = config.dimensions.height;
         
         params.scenario = config.simulation.scenario;
-        params.modulation = config.simulation.modulation;
-        params.rate = config.simulation.rate;
         params.noise = config.simulation.noise;
         params.gain = config.simulation.gain;
+        
+        params.modulation = config.transmission.modulation;
+        params.carrier_hz = config.transmission.carrier_hz;
+        params.dev_hz = config.transmission.dev_hz;
+        params.baud = config.transmission.baud;
+        params.power = config.transmission.power_w;
+        
+        C_MS = config.physics.c_ms;
+        DX_MM = config.physics.dx_mm;
+        
         params.signalScale = config.ui.signalScale;
         params.spectrumScale = config.ui.spectrumScale;
         

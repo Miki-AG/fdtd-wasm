@@ -15,6 +15,7 @@ pub struct DecodeEvent {
     pub label: String,
     pub bits: String,
     pub is_complete: bool,
+    pub is_error: bool,
 }
 
 pub struct PacketDecoder {
@@ -65,6 +66,7 @@ impl PacketDecoder {
                         label: "PRE".to_string(),
                         bits: self.current_bits_buffer.clone(),
                         is_complete: true,
+                        is_error: false,
                     });
                     self.current_bits_buffer.clear();
                     self.state = PacketState::SearchSync;
@@ -76,6 +78,7 @@ impl PacketDecoder {
                         label: "SYNC".to_string(),
                         bits: self.current_bits_buffer.clone(),
                         is_complete: true,
+                        is_error: false,
                     });
                     self.current_bits_buffer.clear();
                     self.state = PacketState::ReadLength;
@@ -90,6 +93,7 @@ impl PacketDecoder {
                         label: "LEN".to_string(),
                         bits: self.current_bits_buffer.clone(),
                         is_complete: true,
+                        is_error: false,
                     });
                     self.current_bits_buffer.clear();
                     self.state = PacketState::ReadPayload;
@@ -109,6 +113,7 @@ impl PacketDecoder {
                         label,
                         bits: self.current_bits_buffer.clone(),
                         is_complete: true,
+                        is_error: false,
                     });
                     self.current_bits_buffer.clear();
                     self.bit_count = 0;
@@ -121,20 +126,23 @@ impl PacketDecoder {
                 self.bit_count += 1;
                 if self.bit_count == 8 {
                     self.crc = self.buffer;
-                    self.history.push(DecodeEvent {
-                        label: "CRC".to_string(),
-                        bits: self.current_bits_buffer.clone(),
-                        is_complete: true,
-                    });
-                    self.current_bits_buffer.clear();
                     
                     // Validate CRC
                     let sum: u16 = self.payload.iter().map(|&b| b as u16).sum();
                     let calc_crc = (sum % 256) as u8;
+                    let is_valid = self.crc == calc_crc;
+
+                    self.history.push(DecodeEvent {
+                        label: "CRC".to_string(),
+                        bits: self.current_bits_buffer.clone(),
+                        is_complete: true,
+                        is_error: !is_valid,
+                    });
+                    self.current_bits_buffer.clear();
                     
                     self.state = PacketState::SearchPreamble; // Reset for next
                     
-                    if self.crc == calc_crc {
+                    if is_valid {
                         return Some(String::from_utf8_lossy(&self.payload).to_string());
                     } else {
                         // CRC Error
