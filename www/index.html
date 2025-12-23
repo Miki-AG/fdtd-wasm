@@ -5,118 +5,119 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FDTD WASM Simulator</title>
+  <script src="https://cdn.jsdelivr.net/npm/tweakpane@3.1.9/dist/tweakpane.min.js"></script>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #111;
+      color: #eee;
       display: flex;
       flex-direction: column;
       align-items: center;
-      background: #222;
-      color: #eee;
+      overflow-x: hidden;
     }
 
     h1 {
-      margin-bottom: 10px;
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-weight: 300;
+      letter-spacing: 1px;
     }
 
-    canvas {
-      border: 1px solid #555;
-      background: #000;
+    #mainContainer {
+      display: grid;
+      grid-template-columns: 20% 60% 20%;
+      gap: 15px;
+      width: 100%;
+      max-width: 1600px;
+      margin: 0 auto;
+      align-items: start;
     }
 
-    #controls {
-      margin-top: 15px;
+    .column {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      padding: 12px;
+      border-radius: 4px;
       display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    canvas#simCanvas {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1000 / 600;
+      border: 1px solid #333;
+      background: #000;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    .column-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: #888;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 5px;
+    }
+
+    .canvas-group {
+      display: flex;
+      flex-direction: column;
       gap: 10px;
       align-items: center;
+      margin-top: 15px;
     }
 
-    button {
-      padding: 8px 16px;
-      cursor: pointer;
-      font-size: 16px;
+    .canvas-label {
+      font-size: 10px;
+      color: #666;
     }
 
     #stats {
+      margin-top: 10px;
       font-family: monospace;
-    }
-
-    #signalContainer {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: #111;
-      border: 1px solid #444;
-      padding: 5px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    #signalCanvas {
-      border: 1px solid #333;
-      background: #000;
-    }
-
-    #signalLabel {
       font-size: 12px;
-      margin-bottom: 2px;
+      color: #666;
+      text-align: center;
     }
   </style>
 </head>
 
 <body>
-  <h1>2D FDTD Simulator (Rust + WASM)</h1>
-  <canvas id="simCanvas"></canvas>
-
-  <div id="signalContainer">
-    <div id="signalLabel">Received Signal</div>
-    <canvas id="signalCanvas" width="100" height="100"></canvas>
-    <div id="signalLabel" style="margin-top: 5px;">Spectrum (FFT)</div>
-    <canvas id="fftCanvas" width="100" height="100" style="border: 1px solid #333; background: #000;"></canvas>
-
-    <div style="margin-top: 5px; width: 100%; display: flex; flex-direction: column; align-items: center;">
-      <label for="gainSlider" style="font-size: 10px;">Gain: <span id="gainValue">5x</span></label>
-      <input type="range" id="gainSlider" min="1" max="100" value="5" style="width: 90%;">
-    </div>
-  </div>
-
-  <div id="commsContainer" style="margin-top: 10px; display: flex; gap: 10px; align-items: center;">
-    <select id="modulationSelect" style="font-family: monospace;">
-      <option value="FSK" selected>FSK</option>
-      <option value="ASK">ASK</option>
-    </select>
-
-    <div style="display: flex; flex-direction: column; align-items: center; width: 100px;">
-      <label for="rateSlider" style="font-size: 10px;">Bit Rate</label>
-      <input type="range" id="rateSlider" min="0" max="180" value="0" style="width: 100%;">
+  <div id="mainContainer">
+    <!-- Left: Emitter & Parameters (20%) -->
+    <div id="leftColumn" class="column">
+      <div>
+        <div class="column-title">Transmitter</div>
+        <div id="txPaneContainer"></div>
+      </div>
+      <div>
+        <div class="column-title">Parameters</div>
+        <div id="paramsPaneContainer"></div>
+      </div>
+      <div id="stats">Step: 0</div>
     </div>
 
-    <div style="display: flex; flex-direction: column; align-items: center; width: 100px;">
-      <label for="noiseSlider" style="font-size: 10px;">Noise Level</label>
-      <input type="range" id="noiseSlider" min="0" max="50" value="0" style="width: 100%;">
+    <!-- Center: Simulation (60%) -->
+    <div id="centerColumn">
+      <canvas id="simCanvas"></canvas>
     </div>
 
-    <input type="text" id="msgInput" placeholder="Message..." style="width: 100px;">
-    <button id="sendBtn">Send</button>
-    <div style="font-family: monospace; font-size: 12px;">
-      Tx: <span id="txBits" style="color: #ff0;"></span><br>
-      Rx: <span id="rxBits"></span><br>
-      Text: <span id="rxText" style="color: #0f0;"></span>
+    <!-- Right: Receiver (20%) -->
+    <div id="rightColumn" class="column">
+      <div class="column-title">Receiver</div>
+      <div id="rxPaneContainer"></div>
     </div>
-  </div>
-
-  <div id="packetStatusContainer" style="margin-top: 5px; font-family: sans-serif; font-size: 12px; color: #888;">
-    Packet Stage: <span id="packetState">Idle</span>
-  </div>
-
-  <div id="controls">
-    <select id="scenarioSelect">
-      <option value="box">Simple Box</option>
-      <option value="free_space" selected>Free Space (No Obstacle)</option>
-      <option value="double_parabola">Double Parabolic Antenna</option>
-    </select>
-    <div id="stats">Step: 0</div>
   </div>
 
   <script type="module" src="./index.js?v=5"></script>

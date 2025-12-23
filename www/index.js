@@ -14,22 +14,96 @@ const HEIGHT = 600;
 const canvas = document.getElementById('simCanvas');
 const ctx = canvas.getContext('2d');
 const signalCanvas = document.getElementById('signalCanvas');
-const signalCtx = signalCanvas.getContext('2d');
 const fftCanvas = document.getElementById('fftCanvas');
-const fftCtx = fftCanvas.getContext('2d');
-const scenarioSelect = document.getElementById('scenarioSelect');
 const statsDiv = document.getElementById('stats');
-const gainSlider = document.getElementById('gainSlider');
-const gainValueLabel = document.getElementById('gainValue');
-const modulationSelect = document.getElementById('modulationSelect');
-const rateSlider = document.getElementById('rateSlider');
-const noiseSlider = document.getElementById('noiseSlider');
-const msgInput = document.getElementById('msgInput');
-const sendBtn = document.getElementById('sendBtn');
-const txBitsSpan = document.getElementById('txBits');
-const rxBitsSpan = document.getElementById('rxBits');
-const rxTextSpan = document.getElementById('rxText');
-const packetStateSpan = document.getElementById('packetState');
+
+const params = {
+    scenario: 'free_space',
+    modulation: 'FSK',
+    rate: 0,
+    noise: 0,
+    gain: 5,
+    message: '',
+    txBits: '',
+    rxBits: '',
+    rxText: '',
+    packetState: 'Idle',
+    rxSignalValue: 0,
+    rxSpectrumPeak: 0
+};
+
+const txPane = new Tweakpane.Pane({ 
+    container: document.getElementById('txPaneContainer'),
+    title: 'Transmitter' 
+});
+txPane.addInput(params, 'message', { label: 'Message' });
+txPane.addButton({ title: 'Send Message' }).on('click', () => {
+    if (simulator && params.message) {
+        simulator.send_message(params.message);
+        params.txBits = simulator.get_transmission_bits();
+        params.message = '';
+        txPane.refresh();
+        if (!isRunning) startSimulation();
+    }
+});
+txPane.addMonitor(params, 'txBits', { label: 'Last Tx' });
+
+const paramsPane = new Tweakpane.Pane({ 
+    container: document.getElementById('paramsPaneContainer'),
+    title: 'Global Settings' 
+});
+paramsPane.addInput(params, 'scenario', {
+    label: 'Scenario',
+    options: {
+        'Free Space': 'free_space',
+        'Simple Box': 'box',
+        'Double Parabolic': 'double_parabola'
+    }
+}).on('change', () => resetSimulation());
+
+paramsPane.addInput(params, 'modulation', {
+    label: 'Modulation',
+    options: { ASK: 'ASK', FSK: 'FSK' }
+}).on('change', (ev) => {
+    if (simulator) simulator.set_comms_scheme(ev.value === 'ASK');
+});
+
+paramsPane.addInput(params, 'rate', {
+    label: 'Bit Rate',
+    min: 0, max: 180, step: 1
+}).on('change', (ev) => {
+    if (simulator) {
+        const samples = 200 - ev.value;
+        simulator.set_symbol_duration(samples);
+    }
+});
+
+paramsPane.addInput(params, 'noise', {
+    label: 'Noise Level',
+    min: 0, max: 0.5, step: 0.01
+});
+
+paramsPane.addInput(params, 'gain', { label: 'Visual Gain', min: 1, max: 100 });
+
+const rxPane = new Tweakpane.Pane({ 
+    container: document.getElementById('rxPaneContainer'),
+    title: 'Receiver Status' 
+});
+rxPane.addMonitor(params, 'rxText', { label: 'Text' });
+rxPane.addMonitor(params, 'rxBits', { label: 'Bits' });
+rxPane.addMonitor(params, 'packetState', { label: 'Status' });
+rxPane.addMonitor(params, 'rxSignalValue', {
+    label: 'Signal',
+    view: 'graph',
+    min: -50,
+    max: 50
+});
+rxPane.addMonitor(params, 'rxSpectrumPeak', {
+    label: 'Spectrum',
+    view: 'graph',
+    min: 0,
+    max: 50
+});
 
 canvas.width = WIDTH;
 canvas.height = HEIGHT;
@@ -129,7 +203,7 @@ function getScenarioConfig(type) {
 }
 
 function getConfig() {
-    currentScenarioConfig = getScenarioConfig(scenarioSelect.value);
+    currentScenarioConfig = getScenarioConfig(params.scenario);
     return {
         width: WIDTH,
         height: HEIGHT,
@@ -141,86 +215,18 @@ function getConfig() {
 
 function updateCommsUI() {
     if (simulator) {
-        if (rxBitsSpan) rxBitsSpan.textContent = simulator.get_received_bits().slice(-64);
-        if (rxTextSpan) {
-            const partial = simulator.get_received_partial_text();
-            // If we are in the middle of a packet (partial is not empty), show it.
-            // Otherwise show the last confirmed full message.
-            if (partial && partial.length > 0) {
-                rxTextSpan.textContent = partial + "_"; // Add cursor to show it's active
-            } else {
-                rxTextSpan.textContent = simulator.get_received_text();
-            }
+        params.rxBits = simulator.get_received_bits().slice(-64);
+        const partial = simulator.get_received_partial_text();
+        if (partial && partial.length > 0) {
+            params.rxText = partial + "_";
+        } else {
+            params.rxText = simulator.get_received_text();
         }
-        if (packetStateSpan) packetStateSpan.textContent = simulator.get_demodulator_status();
+        params.packetState = simulator.get_demodulator_status();
     }
 }
 
-function computeDFT(signal) {
-    const N = signal.length;
-    const spectrum = new Array(N / 2).fill(0);
-
-    for (let k = 0; k < N / 2; k++) {
-        let re = 0;
-        let im = 0;
-        for (let n = 0; n < N; n++) {
-            const theta = -2 * Math.PI * k * n / N;
-            re += signal[n] * Math.cos(theta);
-            im += signal[n] * Math.sin(theta);
-        }
-        // Magnitude
-        spectrum[k] = Math.sqrt(re * re + im * im);
-    }
-    return spectrum;
-}
-
-function drawFFT() {
-    if (!fftCtx) return;
-    fftCtx.fillStyle = '#000';
-    fftCtx.fillRect(0, 0, 100, 100);
-
-    const spectrum = computeDFT(signalHistory);
-    // Find max for scaling
-    let maxMag = 0;
-    for (let i = 0; i < spectrum.length; i++) {
-        if (spectrum[i] > maxMag) maxMag = spectrum[i];
-    }
-
-    fftCtx.fillStyle = '#0ff'; // Cyan bars
-
-    const barWidth = 100 / spectrum.length;
-
-    for (let i = 0; i < spectrum.length; i++) {
-        let height = 0;
-        if (maxMag > 0.001) {
-            height = (spectrum[i] / maxMag) * 90; // leave 10px headroom
-        }
-
-        const x = i * barWidth;
-        const y = 100 - height;
-        fftCtx.fillRect(x, y, barWidth - 1, height);
-    }
-}
-
-function drawSignal() {
-    signalCtx.fillStyle = '#000';
-    signalCtx.fillRect(0, 0, 100, 100);
-
-    signalCtx.beginPath();
-    signalCtx.strokeStyle = '#0f0';
-    signalCtx.lineWidth = 1;
-
-    const zoom = parseFloat(gainSlider.value);
-    const midY = 50;
-
-    for (let i = 0; i < 100; i++) {
-        const val = signalHistory[i];
-        const y = midY - val * zoom;
-        if (i === 0) signalCtx.moveTo(i, y);
-        else signalCtx.lineTo(i, y);
-    }
-    signalCtx.stroke();
-}
+// --- Helper Functions ---
 
 function draw() {
     if (!simulator) return;
@@ -265,7 +271,7 @@ function resetSimulation() {
     try {
         const config = getConfig();
         simulator = new FdtdSimulator(config);
-        simulator.set_comms_scheme(modulationSelect.value === 'ASK');
+        simulator.set_comms_scheme(params.modulation === 'ASK');
         draw();
         updateStats();
     } catch (e) {
@@ -298,23 +304,33 @@ function renderLoop() {
             let val = simulator.get_field_at(currentScenarioConfig.receiver.x, currentScenarioConfig.receiver.y);
 
             // Inject Noise
-            if (noiseSlider) {
-                const noiseLevel = parseFloat(noiseSlider.value);
-                if (noiseLevel > 0) {
-                    // Random noise between -noiseLevel and +noiseLevel
-                    val += (Math.random() - 0.5) * 2 * noiseLevel;
-                }
+            const noiseLevel = params.noise;
+            if (noiseLevel > 0) {
+                // Random noise between -noiseLevel and +noiseLevel
+                val += (Math.random() - 0.5) * 2 * noiseLevel;
             }
 
             signalHistory.push(val);
             signalHistory.shift();
+
+            // Feed graphs
+            params.rxSignalValue = val;
+            
+            // Simpler spectrum proxy: Magnitude at carrier frequency (index proportional to 0.05 freq)
+            // freq 0.05 roughly corresponds to index 0.05 * 100 = 5 in a 100pt DFT.
+            // But we can just use the peak magnitude from signalHistory for the graph.
+            let max = 0;
+            for(let j=0; j<signalHistory.length; j++) {
+                const abs = Math.abs(signalHistory[j]);
+                if (abs > max) max = abs;
+            }
+            params.rxSpectrumPeak = max;
+
             simulator.process_receiver_signal(val);
         }
     }
 
     draw();
-    drawSignal();
-    drawFFT();
     updateStats();
     updateCommsUI();
 
@@ -325,49 +341,7 @@ function renderLoop() {
 
 async function run() {
     await init();
-
     resetSimulation();
-
-    scenarioSelect.addEventListener('change', resetSimulation);
-
-    modulationSelect.addEventListener('change', () => {
-        if (simulator) {
-            simulator.set_comms_scheme(modulationSelect.value === 'ASK');
-        }
-    });
-
-    gainSlider.addEventListener('input', (e) => {
-        gainValueLabel.textContent = `${e.target.value}x`;
-    });
-
-    rateSlider.addEventListener('input', (e) => {
-        if (simulator) {
-            const val = parseInt(e.target.value, 10);
-            // Inverted logic: High Slider = High Rate = Low Duration
-            // min(0) -> 200 samples. max(180) -> 20 samples.
-            const samples = 200 - val;
-            simulator.set_symbol_duration(samples);
-        }
-    });
-
-    sendBtn.addEventListener('click', () => {
-        console.log("Send clicked. Simulator:", !!simulator, "Msg:", msgInput.value);
-        if (simulator && msgInput.value) {
-            console.log("Sending message...");
-            simulator.send_message(msgInput.value);
-            const bits = simulator.get_transmission_bits();
-            console.log("Bits:", bits);
-            txBitsSpan.textContent = bits;
-            msgInput.value = '';
-
-            if (!isRunning) {
-                console.log("Starting simulation...");
-                startSimulation();
-            } else {
-                console.log("Simulation already running.");
-            }
-        }
-    });
 }
 
 run();
