@@ -17,9 +17,6 @@ const signalCanvas = document.getElementById('signalCanvas');
 const signalCtx = signalCanvas.getContext('2d');
 const fftCanvas = document.getElementById('fftCanvas');
 const fftCtx = fftCanvas.getContext('2d');
-const toggleBtn = document.getElementById('toggleBtn');
-const resetBtn = document.getElementById('resetBtn');
-const signalSelect = document.getElementById('signalType');
 const scenarioSelect = document.getElementById('scenarioSelect');
 const statsDiv = document.getElementById('stats');
 const gainSlider = document.getElementById('gainSlider');
@@ -85,7 +82,7 @@ function getScenarioConfig(type) {
                 y: HEIGHT / 2,
                 amplitude: 50.0,
                 frequency: freq,
-                signal_type: signalSelect.value
+                signal_type: 'ContinuousSine'
             },
             receiver: {
                 x: largeFocusX,
@@ -103,7 +100,7 @@ function getScenarioConfig(type) {
                 y: HEIGHT / 2,
                 amplitude: 50.0,
                 frequency: freq,
-                signal_type: signalSelect.value
+                signal_type: 'ContinuousSine'
             },
             receiver: {
                 x: WIDTH * 3 / 4,
@@ -118,7 +115,7 @@ function getScenarioConfig(type) {
                 y: HEIGHT / 2,
                 amplitude: 50.0,
                 frequency: freq,
-                signal_type: signalSelect.value
+                signal_type: 'ContinuousSine'
             },
             receiver: {
                 x: WIDTH * 3 / 4,
@@ -277,23 +274,14 @@ function resetSimulation() {
     }
 }
 
-function toggleSimulation() {
-    if (isRunning) {
-        stopSimulation();
-    } else {
-        startSimulation();
-    }
-}
 
 function startSimulation() {
     isRunning = true;
-    toggleBtn.textContent = "Stop";
     renderLoop();
 }
 
 function stopSimulation() {
     isRunning = false;
-    toggleBtn.textContent = "Start";
     if (animationId) {
         cancelAnimationFrame(animationId);
         animationId = null;
@@ -340,9 +328,6 @@ async function run() {
 
     resetSimulation();
 
-    toggleBtn.addEventListener('click', toggleSimulation);
-    resetBtn.addEventListener('click', resetSimulation);
-    signalSelect.addEventListener('change', resetSimulation);
     scenarioSelect.addEventListener('change', resetSimulation);
 
     modulationSelect.addEventListener('change', () => {
