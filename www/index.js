@@ -4,6 +4,7 @@ import init, { FdtdSimulator } from '../pkg/fdtd_wasm.js';
 let simulator = null;
 let animationId = null;
 let isRunning = false;
+let idleCounter = 0;
 let currentScenarioConfig = null;
 let signalHistory = new Array(100).fill(0); // 100px wide
 
@@ -29,7 +30,9 @@ const params = {
     rxText: '',
     packetState: 'Idle',
     rxSignalValue: 0,
-    rxSpectrumPeak: 0
+    rxSpectrumPeak: 0,
+    signalScale: 1,
+    spectrumScale: 1
 };
 
 const txPane = new Tweakpane.Pane({ 
@@ -89,21 +92,40 @@ const rxPane = new Tweakpane.Pane({
     container: document.getElementById('rxPaneContainer'),
     title: 'Receiver Status' 
 });
-rxPane.addMonitor(params, 'rxText', { label: 'Text' });
-rxPane.addMonitor(params, 'rxBits', { label: 'Bits' });
-rxPane.addMonitor(params, 'packetState', { label: 'Status' });
-rxPane.addMonitor(params, 'rxSignalValue', {
+
+rxPane.addSeparator();
+
+const signalMonitor = rxPane.addMonitor(params, 'rxSignalValue', {
     label: 'Signal',
     view: 'graph',
-    min: -50,
-    max: 50
+    min: -1,
+    max: 1,
+    interval: 0
 });
-rxPane.addMonitor(params, 'rxSpectrumPeak', {
+rxPane.addInput(params, 'signalScale', {
+    label: 'Signal Gain',
+    min: 0.1,
+    max: 100
+});
+
+rxPane.addSeparator();
+
+const spectrumMonitor = rxPane.addMonitor(params, 'rxSpectrumPeak', {
     label: 'Spectrum',
     view: 'graph',
     min: 0,
-    max: 50
+    max: 1,
+    interval: 0
 });
+rxPane.addInput(params, 'spectrumScale', {
+    label: 'Spec. Gain',
+    min: 0.1,
+    max: 100
+});
+
+const rxTextMonitor = rxPane.addMonitor(params, 'rxText', { label: 'Text' });
+const rxBitsMonitor = rxPane.addMonitor(params, 'rxBits', { label: 'Bits' });
+const rxStateMonitor = rxPane.addMonitor(params, 'packetState', { label: 'Status' });
 
 canvas.width = WIDTH;
 canvas.height = HEIGHT;
@@ -223,6 +245,10 @@ function updateCommsUI() {
             params.rxText = simulator.get_received_text();
         }
         params.packetState = simulator.get_demodulator_status();
+
+        rxTextMonitor.refresh();
+        rxBitsMonitor.refresh();
+        rxStateMonitor.refresh();
     }
 }
 
@@ -313,21 +339,33 @@ function renderLoop() {
             signalHistory.push(val);
             signalHistory.shift();
 
-            // Feed graphs
-            params.rxSignalValue = val;
+            // Feed graphs (Scale acts as multiplier/Gain)
+            params.rxSignalValue = val * params.signalScale;
             
-            // Simpler spectrum proxy: Magnitude at carrier frequency (index proportional to 0.05 freq)
-            // freq 0.05 roughly corresponds to index 0.05 * 100 = 5 in a 100pt DFT.
-            // But we can just use the peak magnitude from signalHistory for the graph.
             let max = 0;
             for(let j=0; j<signalHistory.length; j++) {
                 const abs = Math.abs(signalHistory[j]);
                 if (abs > max) max = abs;
             }
-            params.rxSpectrumPeak = max;
+            params.rxSpectrumPeak = max * params.spectrumScale;
+
+            signalMonitor.refresh();
+            spectrumMonitor.refresh();
 
             simulator.process_receiver_signal(val);
+
+            // Auto-pause logic: stop if idle for too long
+            if (params.packetState === 'Idle') {
+                idleCounter++;
+            } else {
+                idleCounter = 0;
+            }
         }
+    }
+
+    if (idleCounter > 1000) { // About 200 frames at 5 steps per frame
+        stopSimulation();
+        idleCounter = 0;
     }
 
     draw();
