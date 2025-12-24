@@ -1,0 +1,17 @@
+{
+  "dimensions": {
+    "width": 1000,
+    "height": 600
+  },
+  "simulation": {
+    "scenario": "free_space",
+    "modulation": "FSK",
+    "rate": 0,
+    "noise": 0,
+    "gain": 5
+  },
+  "ui": {
+    "signalScale": 1,
+    "spectrumScale": 1
+  }
+}
